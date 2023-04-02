@@ -1,0 +1,28 @@
+{
+  "name": "css-to-html",
+  "version": "1.0.0",
+  "description": "Generate HTML documents from CSS.",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Gigabyte5671/CSS-to-HTML.git"
+  },
+  "keywords": [
+    "css",
+    "html",
+    "generator",
+    "converter"
+  ],
+  "author": "Giga",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Gigabyte5671/CSS-to-HTML/issues"
+  },
+  "homepage": "https://github.com/Gigabyte5671/CSS-to-HTML#readme",
+  "dependencies": {
+  }
+}
