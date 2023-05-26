@@ -60,7 +60,6 @@ export function cssToHtml(css: CSSRuleList | string): HTMLBodyElement {
 				else if (descriptor.addressCharacter === '#') {
 					descriptor.id += character;
 				}
-	
 				descriptor.previousCharacter = character;
 			},
 			clear: (): void => {
@@ -77,9 +76,7 @@ export function cssToHtml(css: CSSRuleList | string): HTMLBodyElement {
 			const newElement = document.createElement(descriptor.tag || 'div');
 			// Add the classes.
 			for (const c of descriptor.classes) {
-				if (c) {
-					newElement.classList.add(c);
-				}
+				(c && newElement.classList.add(c));
 			}
 			// Add the ID.
 			if (descriptor.id) {
