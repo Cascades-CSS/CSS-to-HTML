@@ -29,9 +29,11 @@ const html = cssToHtml(css);
 Input:
 ```css
 h1 {
+	content: 'Awesome!';
 	color: grey;
 }
 p > button.rounded {
+	content: 'Click here';
 	background: #fff;
 	border-radius: 8px;
 }
@@ -39,6 +41,7 @@ p > button.rounded:hover {
 	background: #ddd;
 }
 a img#logo {
+	content: 'https://example.com/image';
 	display: block;
 	width: 1.5em;
 	height: 1.5em;
@@ -48,10 +51,10 @@ a img#logo {
 Output:
 ```html
 <body>
-	<h1></h1>
+	<h1>Awesome!</h1>
 	<p>
-		<button class="rounded"></button>
+		<button class="rounded">Click here</button>
 	</p>
-	<a><img id="logo"></a>
+	<a><img src="https://example.com/image" id="logo"></a>
 </body>
 ```

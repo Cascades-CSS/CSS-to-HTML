@@ -8,9 +8,11 @@ const input = `
 	box-sizing: border-box;
 }
 a {
+	content: 'https://example.com/';
 	border-radius: 10px;
 }
 button {
+	content: 'Click me';
 	background-color: red;
 }
 button:hover {
@@ -22,6 +24,7 @@ button:hover {
 	background-color: red;
 }
 nav    a#logo.icon> img {
+	content: 'https://example.com/image';
 	display: block;
 }
 .pie .pastry.crenelations {

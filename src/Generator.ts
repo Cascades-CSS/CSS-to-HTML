@@ -138,6 +138,49 @@ export function cssToHtml(css: CSSRuleList | string): HTMLBodyElement {
 				descriptor.clear();
 			}
 		}
+
+		// If the rule has a `content` property, populate the element with the specified content appropriately.
+		let content = rule.style.content;
+		const element = descriptor.previousElement;
+		if (content && element) {
+			// Strip any quote marks from around the content string.
+			if (/(?:'|")/.test(content.charAt(0)) && /(?:'|")/.test(content.charAt(content.length - 1))) {
+				content = content.substring(1, content.length - 1);
+			}
+			// Place the content in the `href` property of anchor elements.
+			if (element instanceof HTMLAnchorElement) {
+				element.href = content;
+			}
+			// Place the content in the `src` property of audio, iframe, image, and video elements.
+			else if (
+				element instanceof HTMLAudioElement
+				|| element instanceof HTMLIFrameElement
+				|| element instanceof HTMLImageElement
+				|| element instanceof HTMLVideoElement
+			) {
+				element.src = content;
+			}
+			// Place the content in the `placeholder` property of input and textarea elements.
+			else if (
+				element instanceof HTMLInputElement
+				|| element instanceof HTMLTextAreaElement
+			) {
+				element.placeholder = content;
+			}
+			// Use the content as inner-text and place it in the `value` property of option elements.
+			else if (element instanceof HTMLOptionElement) {
+				element.innerText = content;
+				element.value = content;
+			}
+			// Place the content in the `value` property of select elements.
+			else if (element instanceof HTMLSelectElement) {
+				element.value = content;
+			}
+			// Use the content as inner-text for all other elements.
+			else {
+				element.innerText = content;
+			}
+		}
 	}
 
 	return output;
