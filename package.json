@@ -10,7 +10,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Gigabyte5671/CSS-to-HTML.git"
+    "url": "git+https://github.com/CSS-Canvas/CSS-to-HTML.git"
   },
   "keywords": [
     "css",
@@ -21,9 +21,7 @@
   "author": "Giga",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/Gigabyte5671/CSS-to-HTML/issues"
+    "url": "https://github.com/CSS-Canvas/CSS-to-HTML/issues"
   },
-  "homepage": "https://github.com/Gigabyte5671/CSS-to-HTML#readme",
-  "dependencies": {
-  }
+  "homepage": "https://github.com/CSS-Canvas/CSS-to-HTML#readme"
 }
