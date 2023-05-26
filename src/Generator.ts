@@ -1,17 +1,22 @@
 /**
- * Generate an HTML document from a CSS string.
- * @param css The style sheet string.
+ * Generate an HTML document from CSS.
+ * @param css The style sheet.
  * @returns An HTML body element containing the generated DOM.
  */
-export function cssToHtml(css: string): HTMLBodyElement {
+export function cssToHtml(css: CSSRuleList | string): HTMLBodyElement {
 	const output = document.createElement('body');
-
+	let styleRules: CSSRuleList | undefined;
 	// Parse the CSS string into a CSSOM.
-	const styleDocument = document.implementation.createHTMLDocument();
-	const styleElement = document.createElement('style');
-	styleElement.textContent = css;
-	styleDocument.body.append(styleElement);
-	const styleRules = styleElement.sheet?.cssRules;
+	if (typeof css === 'string') {
+		const styleDocument = document.implementation.createHTMLDocument();
+		const styleElement = document.createElement('style');
+		styleElement.textContent = css;
+		styleDocument.body.append(styleElement);
+		styleRules = styleElement.sheet?.cssRules;
+	} else if (css instanceof CSSRuleList) {
+		styleRules = css;
+	}
+
 	if (!styleRules) {
 		return output;
 	}

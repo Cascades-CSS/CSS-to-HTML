@@ -5,10 +5,20 @@ Generate HTML documents from just CSS.
 
 ## Usage
 
+From a CSS string.
 ```javascript
 import { cssToHtml } from 'css-to-html';
 
 const css = 'p { color: purple; }';
+
+const html = cssToHtml(css);
+```
+
+Or from a style element:
+```javascript
+import { cssToHtml } from 'css-to-html';
+
+const css = document.querySelector('style').sheet.cssRules;
 
 const html = cssToHtml(css);
 ```
