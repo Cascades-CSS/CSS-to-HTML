@@ -1,27 +1,31 @@
 {
-  "name": "css-to-html",
-  "version": "1.0.0",
-  "description": "Generate HTML documents from CSS.",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
-  "type": "module",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/CSS-Canvas/CSS-to-HTML.git"
-  },
-  "keywords": [
-    "css",
-    "html",
-    "generator",
-    "converter"
-  ],
-  "author": "Giga",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/CSS-Canvas/CSS-to-HTML/issues"
-  },
-  "homepage": "https://github.com/CSS-Canvas/CSS-to-HTML#readme"
+	"name": "css-to-html",
+	"version": "1.0.0",
+	"description": "Generate HTML documents from CSS.",
+	"main": "dist/index.js",
+	"types": "dist/index.d.ts",
+	"type": "module",
+	"scripts": {
+		"test": "echo \"Error: no test specified\" && exit 1"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/CSS-Canvas/CSS-to-HTML.git"
+	},
+	"keywords": [
+		"css",
+		"html",
+		"generator",
+		"converter"
+	],
+	"author": {
+		"name": "Giga",
+		"email": "contact@zakweb.dev",
+		"url": "https://zakweb.dev/"
+	},
+	"license": "MIT",
+	"bugs": {
+		"url": "https://github.com/CSS-Canvas/CSS-to-HTML/issues"
+	},
+	"homepage": "https://github.com/CSS-Canvas/CSS-to-HTML#readme"
 }
