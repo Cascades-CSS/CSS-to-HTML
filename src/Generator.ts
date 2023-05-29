@@ -1,6 +1,7 @@
 type Combinator = '>' | '~' | '+';
 
 interface Options {
+	duplicates?: 'preserve' | 'remove';
 }
 
 /**
@@ -92,17 +93,19 @@ export function cssToHtml(css: CSSRuleList | string, options: Options = {}): HTM
 		};
 
 		function addElementToOutput (): void {
-			// If an identical element already exists, skip adding the new element.
-			const existingElements = Array.from(
-				(descriptor.combinator === '>' ?
-				descriptor.previousElement?.children :
-				descriptor.previousElement?.parentElement?.children) ?? output.children
-			);
-			const matchingElement = existingElements.find((element) => descriptor.matchesElement(element));
-			if (matchingElement) {
-				// Reference the matching element so properties such as `content` can cascade.
-				descriptor.previousElement = matchingElement as HTMLElement;
-				return;
+			if (options.duplicates !== 'preserve') {
+				// If an identical element already exists, skip adding the new element.
+				const existingElements = Array.from(
+					(descriptor.combinator === '>' ?
+					descriptor.previousElement?.children :
+					descriptor.previousElement?.parentElement?.children) ?? output.children
+				);
+				const matchingElement = existingElements.find((element) => descriptor.matchesElement(element));
+				if (matchingElement) {
+					// Reference the matching element so properties such as `content` can cascade.
+					descriptor.previousElement = matchingElement as HTMLElement;
+					return;
+				}
 			}
 			// Create the new element.
 			const newElement = document.createElement(descriptor.tag || 'div');
