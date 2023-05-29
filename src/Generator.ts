@@ -1,11 +1,14 @@
 type Combinator = '>' | '~' | '+';
 
+interface Options {
+}
+
 /**
  * Generate an HTML document from CSS.
  * @param css The style sheet.
  * @returns An HTML body element containing the generated DOM.
  */
-export function cssToHtml(css: CSSRuleList | string): HTMLBodyElement {
+export function cssToHtml(css: CSSRuleList | string, options: Options = {}): HTMLBodyElement {
 	const output = document.createElement('body');
 	let styleRules: CSSRuleList | undefined;
 	// Parse the CSS string into a CSSOM.
