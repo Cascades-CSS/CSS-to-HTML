@@ -1,3 +1,5 @@
+type Combinator = '>' | '~' | '+';
+
 /**
  * Generate an HTML document from CSS.
  * @param css The style sheet.
@@ -45,8 +47,8 @@ export function cssToHtml(css: CSSRuleList | string): HTMLBodyElement {
 		const descriptor = {
 			previousElement: undefined as HTMLElement | undefined,
 			previousCharacter: '',
-			combinator: '',
-			addressCharacter: '',
+			combinator: '' as '' | Combinator,
+			addressCharacter: '' as '' | '.' | '#',
 			classes: [''],
 			id: '',
 			tag: '',
@@ -68,11 +70,38 @@ export function cssToHtml(css: CSSRuleList | string): HTMLBodyElement {
 				descriptor.classes = [''];
 				descriptor.id = '';
 				descriptor.tag = '';
+			},
+			matchesElement: (element: Element): boolean => {
+				const descriptorTag = (descriptor.tag.toUpperCase() || 'DIV');
+				const descriptorClasses = descriptor.classes.filter((c) => Boolean(c));
+				// Compare tag, id, and classlist length.
+				if (
+					element.tagName !== descriptorTag
+					|| element.id !== descriptor.id
+					|| element.classList.length !== descriptorClasses.length
+				) {
+					return false;
+				}
+				// Compare classlists.
+				const differingClasses = descriptorClasses.filter((c) => !element.classList.contains(c));
+				return !differingClasses.length;
 			}
 		};
 
 		function addElementToOutput (): void {
-			// Create the element.
+			// If an identical element already exists, skip adding the new element.
+			const existingElements = Array.from(
+				(descriptor.combinator === '>' ?
+				descriptor.previousElement?.children :
+				descriptor.previousElement?.parentElement?.children) ?? output.children
+			);
+			const matchingElement = existingElements.find((element) => descriptor.matchesElement(element));
+			if (matchingElement) {
+				// Reference the matching element so properties such as `content` can cascade.
+				descriptor.previousElement = matchingElement as HTMLElement;
+				return;
+			}
+			// Create the new element.
 			const newElement = document.createElement(descriptor.tag || 'div');
 			// Add the classes.
 			for (const c of descriptor.classes) {
@@ -105,7 +134,7 @@ export function cssToHtml(css: CSSRuleList | string): HTMLBodyElement {
 			// The start of a new selector.
 			if (!descriptor.previousCharacter) {
 				if (/(?:\+|~|>)/.test(character)) {
-					descriptor.combinator = character;
+					descriptor.combinator = character as Combinator;
 				}
 				else if (character === '.' || character === '#') {
 					descriptor.addressCharacter = character;
@@ -130,7 +159,7 @@ export function cssToHtml(css: CSSRuleList | string): HTMLBodyElement {
 			else if (/(?:\+|~|>)/.test(character)) {
 				addElementToOutput();
 				descriptor.clear();
-				descriptor.combinator = character;
+				descriptor.combinator = character as Combinator;
 			}
 			// The character none of the above.
 			else {

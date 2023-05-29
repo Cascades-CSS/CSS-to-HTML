@@ -11,6 +11,10 @@ a {
 	content: 'https://example.com/';
 	border-radius: 10px;
 }
+a {
+	content: 'https://example.com/page';
+	border-radius: 10px;
+}
 button {
 	content: 'Click me';
 	background-color: red;
@@ -27,8 +31,15 @@ nav    a#logo.icon> img {
 	content: 'https://example.com/image';
 	display: block;
 }
+nav a#logo.icon > img {
+	content: 'https://example.com/image2';
+}
 .pie .pastry.crenelations {
 	background: radial-gradient(circle at center, orange 10%, yellow);
+}
+button {
+	content: 'Double-click me';
+	background-color: blue;
 }
 `;
 
