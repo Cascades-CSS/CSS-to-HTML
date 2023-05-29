@@ -64,6 +64,7 @@ Output:
 
 An options object can be passed as the second argument to `cssToHtml()` to customize the behaviour of the HTML generator.
 
-|    Option    |        Values        | Description |
-| :----------- | :------------------- | :---------- |
-| `duplicates` | `preserve`, `remove` |             |
+| Option       | Values     | Description |
+| :----------- | :--------- | :---------- |
+| `duplicates` | `preserve` | Preserve duplicate elements. Eg: <br/> `button {} button {}` <br/> Will become: <br/> `<button></button><button></button>`. |
+|              | `remove`   | Remove duplicate elements. Eg: <br/> `button {} button {}` <br/> Will become: <br/> `<button></button>`. |
