@@ -31,12 +31,12 @@ export function cssToHtml(css: CSSRuleList | string, options: Options = {}): HTM
 	for (const [index, rule] of Object.entries(styleRules) as [string, (CSSStyleRule | CSSMediaRule)][]) {
 		// Skip:
 		// - Media rules.
-		// - Rules starting with `*`.
 		// - Rules including `:`.
+		// - Rules including with `*`.
 		if (
-			rule instanceof CSSMediaRule
-			|| rule.selectorText.startsWith('*')
 			|| rule.selectorText.includes(':')
+			!(rule instanceof CSSStyleRule)
+			|| rule.selectorText.includes('*')
 		) {
 			continue;
 		}
