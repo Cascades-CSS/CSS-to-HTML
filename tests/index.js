@@ -37,9 +37,23 @@ nav a#logo.icon > img {
 .pie .pastry.crenelations {
 	background: radial-gradient(circle at center, orange 10%, yellow);
 }
+.pie .pastry.crenelations div#crenelation:nth-child(8) {
+	content: 'o';
+}
+.pie .pastry.crenelations div:nth-child(3) {
+	content: 'm';
+}
+.pie .pastry.crenelations div:nth-child(9) {
+	content: 'p';
+}
 button {
 	content: 'Double-click me';
 	background-color: blue;
+}
+span:nth-child(4) {}
+span.first:first-child {}
+span:nth-of-type(3) {
+	content: '3rd span';
 }
 `;
 
