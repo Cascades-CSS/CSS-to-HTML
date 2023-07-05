@@ -69,4 +69,4 @@ An options object can be passed as the second argument to `cssToHtml()` to custo
 | `duplicates` | `preserve` | Preserve duplicate elements. Eg: <br/> `button {} button {}` <br/> Will become: <br/> `<button></button><button></button>`. |
 |              | `remove` * | Remove duplicate elements. Eg: <br/> `button {} button {}` <br/> Will become: <br/> `<button></button>`. |
 | `fill`       | `fill`   * | Fill the DOM with duplicate elements up to the desired level. Eg: <br/> `span#fourth:nth-child(4) {}` <br/> Will become: <br/> `<span></span><span></span><span></span><span id="fourth"></span>`. |
-|              | `no-fill`  | Don't fill. Eg: <br/> `span#fourth:nth-child(4) {}` <br/> Will become: <br/> `<span></span>`. |
+|              | `no-fill`  | Don't fill. Eg: <br/> `span#fourth:nth-child(4) {}` <br/> Will become: <br/> `<span id="fourth"></span>`. |
