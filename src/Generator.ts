@@ -14,8 +14,8 @@ export function cssToHtml(css: CSSRuleList | string, options: Options = {}): HTM
 	const output = document.createElement('body');
 	const fillerElements = [] as HTMLElement[];
 	function isFillerElement (element: HTMLElement | Element): boolean {
-		for (const element of fillerElements) {
-			if (element.isSameNode(element)) {
+		for (const fillerElement of fillerElements) {
+			if (fillerElement.isSameNode(element)) {
 				return true;
 			}
 		}
@@ -38,7 +38,9 @@ export function cssToHtml(css: CSSRuleList | string, options: Options = {}): HTM
 		return output;
 	}
 
-	// Convert each rule into an HTML element, then add it to the output DOM.
+	const separatedStyleRules = [] as [string, CSSStyleRule][];
+
+	// Filter and format the supplied style rules.
 	for (const [index, rule] of Object.entries(styleRules) as [string, (CSSStyleRule | CSSMediaRule)][]) {
 		// Skip:
 		// - Non-style rules.
@@ -60,11 +62,20 @@ export function cssToHtml(css: CSSRuleList | string, options: Options = {}): HTM
 		}
 
 		// Format any combinators in the rule's selector.
-		let selector = rule.selectorText
+		const selector = rule.selectorText
 			.replaceAll(/([\w-])\s+([\w-\.\#])/g, '$1>$2')	// Replace child combinator spaces with `>`.
 			.replaceAll(/>{2,}/g, '>')						// Remove excess `>`.
 			.replaceAll(' ', '');							// Remove excess spaces.
 
+		// Separate selectors with commas into their own style rules.
+		const splitSelector = selector.split(',');
+		for (const subSelector of splitSelector) {
+			separatedStyleRules.push([subSelector, rule]);
+		}
+	}
+
+	// Convert each rule into an HTML element, then add it to the output DOM.
+	for (let [selector, rule] of separatedStyleRules) {
 		// This object describes an element based on pieces of a selector.
 		const descriptor = {
 			previousElement: undefined as HTMLElement | undefined,
