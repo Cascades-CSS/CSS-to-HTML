@@ -1,5 +1,8 @@
 node_modules
 src
 tests
+/test-results/
+/playwright-report/
+/playwright/.cache/
 .gitignore
 tsconfig.json

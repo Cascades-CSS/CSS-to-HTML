@@ -50,10 +50,14 @@ button {
 	content: 'Double-click me';
 	background-color: blue;
 }
-span:nth-child(4) {}
+span:nth-child(4),
 span.first:first-child {}
 span:nth-of-type(3) {
 	content: '3rd span';
+}
+p.comma,
+.comma {
+	content: ',';
 }
 `;
 

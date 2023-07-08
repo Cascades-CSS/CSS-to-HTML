@@ -6,7 +6,8 @@
 	"types": "dist/index.d.ts",
 	"type": "module",
 	"scripts": {
-		"build": "tsc"
+		"build": "tsc",
+		"test": "npm run build && node tests/build.js && npx playwright test"
 	},
 	"repository": {
 		"type": "git",
@@ -27,5 +28,8 @@
 	"bugs": {
 		"url": "https://github.com/CSS-Canvas/CSS-to-HTML/issues"
 	},
-	"homepage": "https://github.com/CSS-Canvas/CSS-to-HTML#readme"
+	"homepage": "https://github.com/CSS-Canvas/CSS-to-HTML#readme",
+	"devDependencies": {
+		"@playwright/test": "^1.35.1"
+	}
 }
