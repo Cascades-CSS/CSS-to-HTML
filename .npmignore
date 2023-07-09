@@ -5,4 +5,5 @@ tests
 /playwright-report/
 /playwright/.cache/
 .gitignore
+playwright.config.ts
 tsconfig.json
