@@ -29,7 +29,9 @@ test('Cascading', async ({ page }) => {
 		return element
 			&& element.href === 'https://example.com/page'
 			&& element.innerHTML === ''
-			&& window.getComputedStyle(element).borderRadius === '10px';
+			&& window.getComputedStyle(element).borderRadius === '10px'
+			&& element.previousSibling === null
+			&& element.nextSibling === null;
 	}, css);
 
 	expect(result).toBeDefined();
