@@ -2,7 +2,8 @@ type Combinator = '>' | '~' | '+';
 
 interface Options {
 	duplicates?: 'preserve' | 'remove';
-	fill?: 'fill' | 'no-fill'
+	fill?: 'fill' | 'no-fill';
+	mergeNth?: 'merge' | 'no-merge'
 }
 
 /**
@@ -20,6 +21,20 @@ export function cssToHtml(css: CSSRuleList | string, options: Options = {}): HTM
 			}
 		}
 		return false;
+	}
+	function mergeElements <T extends HTMLElement | Element> (mergeFrom: HTMLElement | Element, mergeTo: T): T | null {
+		if (mergeFrom.tagName !== mergeTo.tagName) {
+			return null;
+		}
+		if (mergeFrom.id && mergeTo.id && mergeFrom.id !== mergeTo.id) {
+			return null;
+		}
+		if (mergeFrom.id) {
+			mergeTo.id = mergeFrom.id;
+		}
+		mergeTo.className += ' ' + mergeFrom.className;
+		mergeTo.className = mergeTo.className.trim();
+		return mergeTo;
 	}
 	let styleRules: CSSRuleList | undefined;
 
@@ -202,12 +217,30 @@ export function cssToHtml(css: CSSRuleList | string, options: Options = {}): HTM
 			descriptor.previousElement = newElement;
 
 			if (fillType === 'first') {
-				parentElement.prepend(newElement);
+				// Check if there is a sibling element in the desired position.
+				const blockingSibling = parentElement.querySelector(childType === 'type' ? `${newElement.tagName}:first-of-type` : '*:first-child');
+				if (blockingSibling) {
+					parentElement.insertBefore(newElement, blockingSibling);
+					if (isFillerElement(blockingSibling) || (options.mergeNth !== 'no-merge' && mergeElements(blockingSibling, newElement))) {
+						blockingSibling.remove();
+					}
+				} else {
+					parentElement.prepend(newElement);
+				}
 				return;
 			}
 
 			if (fillType === 'last') {
-				parentElement.append(newElement);
+				// Check if there is a sibling element in the desired position.
+				const blockingSibling = parentElement.querySelector(childType === 'type' ? `${newElement.tagName}:last-of-type` : `${newElement.tagName}:last-child`);
+				if (blockingSibling) {
+					parentElement.insertBefore(newElement, blockingSibling.nextElementSibling);
+					if (isFillerElement(blockingSibling) || (options.mergeNth !== 'no-merge' && mergeElements(blockingSibling, newElement))) {
+						blockingSibling.remove();
+					}
+				} else {
+					parentElement.append(newElement);
+				}
 				return;
 			}
 
@@ -215,7 +248,7 @@ export function cssToHtml(css: CSSRuleList | string, options: Options = {}): HTM
 			const blockingSibling = parentElement.querySelector(childType === 'type' ? `${newElement.tagName}:nth-of-type(${fillAmount})` : `:nth-child(${fillAmount})`);
 			if (blockingSibling) {
 				parentElement.insertBefore(newElement, blockingSibling);
-				if (isFillerElement(blockingSibling)) {
+				if (isFillerElement(blockingSibling) || (options.mergeNth !== 'no-merge' && mergeElements(blockingSibling, newElement))) {
 					blockingSibling.remove();
 				}
 				return;
