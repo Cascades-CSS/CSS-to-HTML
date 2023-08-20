@@ -2,6 +2,10 @@
 
 Generate HTML documents from just CSS.
 
+```bash
+npm i css-to-html
+```
+
 
 ## Usage
 
