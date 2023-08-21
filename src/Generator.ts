@@ -57,6 +57,22 @@ export async function cssToHtml(css: CSSRuleList | string, options: Options = {}
 
 	// Filter and format the supplied style rules.
 	for (const [index, rule] of Object.entries(styleRules) as [string, (CSSStyleRule | CSSMediaRule)][]) {
+		// Fetch the content of import rules.
+		if (rule instanceof CSSImportRule && new URL(rule.href).pathname.endsWith('.css')) {
+			try {
+				const resource = await fetch(rule.href);
+				if (resource.status !== 200) {
+					throw new Error(`Response status was ${resource.status}.`);
+				}
+				// Recursively convert all imported stylesheets to HTML.
+				const resourceCss = await resource.text();
+				const resourceHtml = await cssToHtml(resourceCss, options);
+				output.innerHTML += resourceHtml.innerHTML;
+			} catch (error) {
+				console.warn('Failed to fetch remote stylesheet:', rule.href, '-', error);
+			}
+		}
+
 		// Skip:
 		// - Non-style rules.
 		// - Rules including `*`.

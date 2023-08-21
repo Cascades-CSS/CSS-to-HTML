@@ -1,6 +1,7 @@
 import { cssToHtml } from '../dist/index.js';
 
 const input = `
+@import url('https://cascades.app/project/wBcGlZUV.css');
 :root {
 	background: #000;
 }

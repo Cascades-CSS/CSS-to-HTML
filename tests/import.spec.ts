@@ -1,37 +1,30 @@
 /*
- * Verify that `:root`, `*`, etc are ignored correctly.
+ * Verify that remote style sheets can be imported.
  */
 
 import { test, expect } from '@playwright/test';
 import { cssToHtml } from '../src/index';
 
 const css = `
-:root {
-	background: #000;
-}
-* {
+@import url('https://cascades.app/project/wBcGlZUV.css');
+div.last {
 	content: 'a';
-	box-sizing: border-box;
-}
-@media screen and (max-width: 200px) {}
-div {
-	content: 'a';
-}
-div:hover {
-	content: 'b';
 }
 `;
 
-test('Ignored', async ({ page }) => {
+test('Import', async ({ page }) => {
 	await page.addScriptTag({ path: './dist/Generator.script.js' });
+
+	page.on('console', msg => console.log(msg.text()));
 
 	const result = await page.evaluate(async (css) => {
 		document.body = await cssToHtml(css);
 
-		const element = document.body.querySelector('div');
+		const element = document.body.querySelector('div.last');
 		return element
 			&& element.innerHTML === 'a'
-			&& element.previousSibling === null
+			&& element.previousElementSibling !== null
+			&& element.previousElementSibling.innerHTML === 'Test'
 			&& element.nextSibling === null;
 	}, css);
 
