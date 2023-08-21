@@ -21,7 +21,7 @@ span:last-child {
 `;
 
 test('Nth-Child', async ({ page }) => {
-	await page.addScriptTag({ path: './tests/GeneratorScript.js' });
+	await page.addScriptTag({ path: './dist/Generator.script.js' });
 
 	const result = await page.evaluate(async (css) => {
 		document.body = cssToHtml(css);

@@ -22,7 +22,7 @@ nav>a#logo.icon > img {
 const html = `<body xmlns="http://www.w3.org/1999/xhtml"><div id="cat"></div><div class="mouse"><span class="flea"></span><i></i></div><nav><a class="icon" id="logo"><img src="https://example.com/image2" /></a></nav></body>`;
 
 test('Selector', async ({ page }) => {
-	await page.addScriptTag({ path: './tests/GeneratorScript.js' });
+	await page.addScriptTag({ path: './dist/Generator.script.js' });
 
 	const result = await page.evaluate(async ([css, html]) => {
 		document.body = cssToHtml(css);
