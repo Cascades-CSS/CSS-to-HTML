@@ -15,7 +15,7 @@ import { cssToHtml } from 'css-to-html';
 
 const css = 'p { color: purple; }';
 
-const html = cssToHtml(css);
+const html = await cssToHtml(css);
 ```
 
 Or from a style element:
@@ -24,7 +24,7 @@ import { cssToHtml } from 'css-to-html';
 
 const css = document.querySelector('style').sheet.cssRules;
 
-const html = cssToHtml(css);
+const html = await cssToHtml(css);
 ```
 
 
