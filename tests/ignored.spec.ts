@@ -27,7 +27,7 @@ test('Ignored', async ({ page }) => {
 	await page.addScriptTag({ path: './dist/Generator.script.js' });
 
 	const result = await page.evaluate(async (css) => {
-		document.body = cssToHtml(css);
+		document.body = await cssToHtml(css);
 
 		const element = document.body.querySelector('div');
 		return element

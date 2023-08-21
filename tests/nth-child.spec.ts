@@ -24,7 +24,7 @@ test('Nth-Child', async ({ page }) => {
 	await page.addScriptTag({ path: './dist/Generator.script.js' });
 
 	const result = await page.evaluate(async (css) => {
-		document.body = cssToHtml(css);
+		document.body = await cssToHtml(css);
 
 		return document.body.querySelectorAll('*').length === 10
 			&& document.body.querySelector('div.first')?.previousElementSibling === null

@@ -11,7 +11,7 @@ interface Options {
  * @param css The style sheet.
  * @returns An HTML body element containing the generated DOM.
  */
-export function cssToHtml(css: CSSRuleList | string, options: Options = {}): HTMLBodyElement {
+export async function cssToHtml(css: CSSRuleList | string, options: Options = {}): Promise<HTMLBodyElement> {
 	const output = document.createElement('body');
 	const fillerElements = [] as HTMLElement[];
 	function isFillerElement (element: HTMLElement | Element): boolean {

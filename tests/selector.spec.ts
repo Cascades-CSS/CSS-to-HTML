@@ -25,7 +25,7 @@ test('Selector', async ({ page }) => {
 	await page.addScriptTag({ path: './dist/Generator.script.js' });
 
 	const result = await page.evaluate(async ([css, html]) => {
-		document.body = cssToHtml(css);
+		document.body = await cssToHtml(css);
 		const styleElement = document.createElement('style');
 		styleElement.innerText = css;
 		document.head.append(styleElement);

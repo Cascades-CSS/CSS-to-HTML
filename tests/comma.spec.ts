@@ -17,7 +17,7 @@ test('Comma', async ({ page }) => {
 	await page.addScriptTag({ path: './dist/Generator.script.js' });
 
 	const result = await page.evaluate(async (css) => {
-		document.body = cssToHtml(css);
+		document.body = await cssToHtml(css);
 
 		return document.body.querySelector('h1')?.innerHTML === 'a'
 			&& document.body.querySelector('p.subtitle')?.innerHTML === 'a'
