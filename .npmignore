@@ -6,4 +6,5 @@ tests
 /playwright/.cache/
 .gitignore
 playwright.config.ts
+post-build.js
 tsconfig.json
