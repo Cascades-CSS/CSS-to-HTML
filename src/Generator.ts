@@ -43,7 +43,7 @@ export async function cssToHtml (css: CSSRuleList | string, options: Options = {
 		return output;
 	}
 
-	// Parse
+	// Parse the CSSOM into individual rules.
 	const rules = new Array<Rule>();
 	const importSet = new Set<string>();
 	
