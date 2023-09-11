@@ -10,31 +10,33 @@ const css = `
 	background: #000;
 }
 * {
-	content: 'a';
+	content: 'A';
 	box-sizing: border-box;
 }
 @media screen and (max-width: 200px) {}
 div {
-	content: 'a';
+	content: 'B';
 }
 div:hover {
-	content: 'b';
+	content: 'C';
+}
+@media screen and (max-width: 800px) {}
+.ignored > section::-webkit-scrollbar {
+	width: 0.5rem;
 }
 `;
 
 test('Ignored', async ({ page }) => {
-	await page.addScriptTag({ path: './dist/Generator.script.js' });
+	await page.goto('http://localhost:5173/');
+	const body = await page.evaluate(async (css) => { document.body = await cssToHtml(css); return document.body.outerHTML; }, css);
 
-	const result = await page.evaluate(async (css) => {
-		document.body = await cssToHtml(css);
+	// The body should have exactly one child.
+	const bodyDirectChildren = page.locator('body *');
+	expect(await bodyDirectChildren.count()).toBe(1);
+	const element = await bodyDirectChildren.elementHandle();
+	expect(element).toBeTruthy();
 
-		const element = document.body.querySelector('div');
-		return element
-			&& element.innerHTML === 'a'
-			&& element.previousSibling === null
-			&& element.nextSibling === null;
-	}, css);
-
-	expect(result).toBeDefined();
-	expect(result).toBe(true);
+	// That element should have specific text content.
+	const content = await element?.innerHTML();
+	expect(content).toBe('B');
 });
