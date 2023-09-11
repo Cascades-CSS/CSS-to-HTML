@@ -1,1 +1,1 @@
-export { cssToHtml } from './Generator.js';
+export { cssToHtml, Options } from './Generator.js';
