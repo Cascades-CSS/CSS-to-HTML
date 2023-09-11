@@ -8,6 +8,7 @@
 	"scripts": {
 		"build": "tsc",
 		"postbuild": "node post-build.js",
+		"test-server": "cd test-server && npm run dev",
 		"test": "npm run build && npx playwright test"
 	},
 	"repository": {
