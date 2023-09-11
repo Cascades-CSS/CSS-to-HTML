@@ -6,28 +6,33 @@ import { test, expect } from '@playwright/test';
 import { cssToHtml } from '../src/index';
 
 const css = `
-@import url('https://cascades.app/project/wBcGlZUV.css');
+@import url('http://localhost:5173/import1.css');
 div.last {
-	content: 'a';
+	content: 'D';
 }
 `;
 
 test('Import', async ({ page }) => {
-	await page.addScriptTag({ path: './dist/Generator.script.js' });
+	await page.goto('http://localhost:5173/');
+	const body = await page.evaluate(async (css) => { document.body = await cssToHtml(css, { imports: 'include' }); return document.body.outerHTML; }, css);
 
-	page.on('console', msg => console.log(msg.text()));
+	// The body should have exactly four direct children.
+	const bodyDirectChildren = page.locator('body > *');
+	expect(await bodyDirectChildren.count()).toBe(4);
 
-	const result = await page.evaluate(async (css) => {
-		document.body = await cssToHtml(css);
+	// The body's direct children should be in a specific order.
+	const last = page.locator('.first:first-child + .second + .third + .last:last-child');
+	expect(await last.count()).toBe(1);
+	const lastElement = await last.elementHandle();
+	expect(lastElement).toBeTruthy();
 
-		const element = document.body.querySelector('div.last');
-		return element
-			&& element.innerHTML === 'a'
-			&& element.previousElementSibling !== null
-			&& element.previousElementSibling.innerHTML === 'Test'
-			&& element.nextSibling === null;
-	}, css);
+	// There should be exactly one span element.
+	const span = page.locator('span');
+	expect(await span.count()).toBe(1);
+	const spanElement = await span.elementHandle();
+	expect(spanElement).toBeTruthy();
 
-	expect(result).toBeDefined();
-	expect(result).toBe(true);
+	// The span should have specific text content.
+	const spanContent = await spanElement?.innerHTML();
+	expect(spanContent).toBe('A');
 });

@@ -17,24 +17,16 @@ nav    a#logo.icon> img {
 nav>a#logo.icon > img {
 	content: 'https://example.com/image2';
 }
+nav input[type="text"].search[readonly] {
+	content: 'Search';
+}
 `;
 
-const html = `<body xmlns="http://www.w3.org/1999/xhtml"><div id="cat"></div><div class="mouse"><span class="flea"></span><i></i></div><nav><a class="icon" id="logo"><img src="https://example.com/image2" /></a></nav></body>`;
+const html = `<body><div id="cat"></div><div class="mouse"><span class="flea"></span><i></i></div><nav><a id="logo" class="icon" href=""><img src="https://example.com/image2"></a><input class="search" type="text" readonly="" placeholder="Search"></nav></body>`;
 
 test('Selector', async ({ page }) => {
-	await page.addScriptTag({ path: './dist/Generator.script.js' });
+	await page.goto('http://localhost:5173/');
+	const body = await page.evaluate(async (css) => { document.body = await cssToHtml(css); return document.body.outerHTML; }, css);
 
-	const result = await page.evaluate(async ([css, html]) => {
-		document.body = await cssToHtml(css);
-		const styleElement = document.createElement('style');
-		styleElement.innerText = css;
-		document.head.append(styleElement);
-
-		const xml = new XMLSerializer().serializeToString(document.body);
-
-		return xml.trim() === html.trim();
-	}, [css, html]);
-
-	expect(result).toBeDefined();
-	expect(result).toBe(true);
+	expect(body).toBe(html);
 });

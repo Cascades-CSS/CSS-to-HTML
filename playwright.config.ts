@@ -37,4 +37,9 @@ export default defineConfig({
 			use: { ...devices['Desktop Safari'] },
 		},
 	],
+	webServer: {
+		command: 'npm run test-server',
+		port: 5173,
+		reuseExistingServer: false
+	}
 });

@@ -1,0 +1,6 @@
+@import url('./import2.css');
+@import url('./import3.css');
+
+.third p {
+	content: 'C';
+}

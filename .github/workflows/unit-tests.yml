@@ -1,0 +1,51 @@
+name: Unit Tests
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  test:
+    timeout-minutes: 30
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        unit: [
+          cascading,
+          comma,
+          ignored,
+          import,
+          nth-child,
+          selector
+        ]
+    steps:
+    - uses: actions/checkout@v3
+    - uses: actions/setup-node@v3
+      with:
+        node-version: 18
+        cache: 'npm'
+    - name: Install dependencies
+      run: npm ci
+    - name: Install test server dependencies
+      run: cd test-server && npm ci
+    - name: Get Playwright version
+      id: playwright-version
+      run: echo "PLAYWRIGHT_VERSION=$(node -e "console.log(require('./package-lock.json').dependencies['@playwright/test'].version)")" >> $GITHUB_ENV
+    - name: Cache Playwright binaries
+      uses: actions/cache@v3
+      id: playwright-cache
+      with:
+        key: playwright-${{ env.PLAYWRIGHT_VERSION }}
+        path: ~/.cache/ms-playwright
+    - if: ${{ steps.playwright-cache.outputs.cache-hit != 'true' }}
+      name: Install Playwright browsers
+      run: npx playwright install --with-deps
+    - if: ${{ steps.playwright-cache.outputs.cache-hit == 'true' }}
+      name: Install Playwright dependencies
+      run: npx playwright install-deps
+    - name: Build
+      run: npm run build
+    - name: Run ${{ matrix.unit }} unit test
+      run: npx playwright test ${{ matrix.unit }}

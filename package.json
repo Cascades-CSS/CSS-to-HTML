@@ -1,13 +1,13 @@
 {
 	"name": "css-to-html",
-	"version": "0.4.0",
+	"version": "0.5.0",
 	"description": "Generate HTML documents from CSS.",
 	"main": "dist/index.js",
 	"types": "dist/index.d.ts",
 	"type": "module",
 	"scripts": {
 		"build": "tsc",
-		"postbuild": "node post-build.js",
+		"test-server": "cd test-server && npm run dev",
 		"test": "npm run build && npx playwright test"
 	},
 	"repository": {
@@ -32,5 +32,8 @@
 	"homepage": "https://github.com/CSS-Canvas/CSS-to-HTML#readme",
 	"devDependencies": {
 		"@playwright/test": "^1.35.1"
+	},
+	"dependencies": {
+		"css-selector-parser": "^2.3.2"
 	}
 }

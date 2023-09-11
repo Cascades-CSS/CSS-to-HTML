@@ -1,10 +1,11 @@
+.github/
 node_modules
 src
 tests
 /test-results/
+/test-server/
 /playwright-report/
 /playwright/.cache/
 .gitignore
 playwright.config.ts
-post-build.js
 tsconfig.json

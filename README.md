@@ -1,5 +1,7 @@
 # CSS-to-HTML
 
+[![Unit Tests](https://github.com/CSS-Canvas/CSS-to-HTML/actions/workflows/unit-tests.yml/badge.svg)](https://github.com/CSS-Canvas/CSS-to-HTML/actions/workflows/unit-tests.yml) ![npm](https://img.shields.io/npm/dt/css-to-html) ![npm bundle size](https://img.shields.io/bundlephobia/min/css-to-html)
+
 Generate HTML documents from just CSS.
 
 ```bash
@@ -66,11 +68,15 @@ Output:
 
 ## Options
 
-An options object can be passed as the second argument to `cssToHtml()` to customize the behaviour of the HTML generator. _(Values marked with * are default)._
+An options object can be passed as the second argument to `cssToHtml()` to customize the behavior of the HTML generator. _(Values marked with * are default)._
 
-| Option       | Values     | Description |
-| :----------- | :--------- | :---------- |
-| `duplicates` | `preserve` | Preserve duplicate elements. Eg: <br/> `button {} button {}` <br/> Will become: <br/> `<button></button><button></button>`. |
-|              | `remove` * | Remove duplicate elements. Eg: <br/> `button {} button {}` <br/> Will become: <br/> `<button></button>`. |
-| `fill`       | `fill`   * | Fill the DOM with duplicate elements up to the desired level. Eg: <br/> `span#fourth:nth-child(4) {}` <br/> Will become: <br/> `<span></span><span></span><span></span><span id="fourth"></span>`. |
-|              | `no-fill`  | Don't fill. Eg: <br/> `span#fourth:nth-child(4) {}` <br/> Will become: <br/> `<span id="fourth"></span>`. |
+| Option       | Values         | Description |
+| :----------- | :------------- | :---------- |
+| `duplicates` | `preserve`     | Preserve duplicate elements. Eg: <br/> `button {} button {}` <br/> Will become: <br/> `<button></button><button></button>`. |
+|              | `remove`     * | Remove duplicate elements. Eg: <br/> `button {} button {}` <br/> Will become: <br/> `<button></button>`. |
+| `fill`       | `fill`       * | Fill the DOM with duplicate elements up to the desired location. Eg: <br/> `span#fourth:nth-child(4) {}` <br/> Will become: <br/> `<span></span><span></span><span></span><span id="fourth"></span>`. |
+|              | `no-fill`      | Don't fill. Eg: <br/> `span#fourth:nth-child(4) {}` <br/> Will become: <br/> `<span id="fourth"></span>`. |
+| `imports`    | `include`      | Fetch imported stylesheets and include them in the HTML generation process. |
+|              | `style-only` * | Ignore `@import` rules. |
+| `mergeNth`   | `merge`      * | Elements generated from `:nth-` selectors will be merged with any similar element occupying the desired location. |
+|              | `no-merge`     | These elements will not be merged. |

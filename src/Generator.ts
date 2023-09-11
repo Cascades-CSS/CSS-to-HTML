@@ -1,400 +1,181 @@
-type Combinator = '>' | '~' | '+';
+import { createParser } from 'css-selector-parser';
+import type { AstRule } from 'css-selector-parser';
+import { Descriptor } from './Descriptor.js';
+import { createCSSOM, elementsAreComparable, mergeElements } from './Utility.js';
 
-interface Options {
+export class Options {
 	duplicates?: 'preserve' | 'remove';
 	fill?: 'fill' | 'no-fill';
-	mergeNth?: 'merge' | 'no-merge'
+	imports?: 'include' | 'style-only';
+	mergeNth?: 'merge' | 'no-merge';
+}
+
+const parse = createParser({ syntax: 'progressive' });
+
+class Rule {
+	rule;
+	selectorAst;
+
+	constructor (rule: CSSStyleRule) {
+		this.rule = rule;
+		this.selectorAst = parse(rule.selectorText);
+	}
 }
 
 /**
  * Generate an HTML document from CSS.
  * @param css The style sheet.
+ * @param options `(Optional)` Options with which to configure the generator.
  * @returns An HTML body element containing the generated DOM.
  */
-export async function cssToHtml(css: CSSRuleList | string, options: Options = {}): Promise<HTMLBodyElement> {
+export async function cssToHtml (css: CSSRuleList | string, options: Options = {}): Promise<HTMLBodyElement> {
 	const output = document.createElement('body');
-	const fillerElements = [] as HTMLElement[];
+
+	const fillerElements = new Array<HTMLElement>();
 	function isFillerElement (element: HTMLElement | Element): boolean {
-		for (const fillerElement of fillerElements) {
-			if (fillerElement.isSameNode(element)) {
-				return true;
-			}
-		}
-		return false;
+		return Boolean(fillerElements.find((fillerElement) => element.isSameNode(fillerElement)));
 	}
-	function mergeElements <T extends HTMLElement | Element> (mergeFrom: HTMLElement | Element, mergeTo: T): T | null {
-		if (mergeFrom.tagName !== mergeTo.tagName) {
-			return null;
-		}
-		if (mergeFrom.id && mergeTo.id && mergeFrom.id !== mergeTo.id) {
-			return null;
-		}
-		if (mergeFrom.id) {
-			mergeTo.id = mergeFrom.id;
-		}
-		mergeTo.className += ' ' + mergeFrom.className;
-		mergeTo.className = mergeTo.className.trim();
-		return mergeTo;
-	}
-	let styleRules: CSSRuleList | undefined;
 
 	// Parse the CSS string into a CSSOM.
-	if (typeof css === 'string') {
-		const styleDocument = document.implementation.createHTMLDocument();
-		const styleElement = document.createElement('style');
-		styleElement.textContent = css;
-		styleDocument.body.append(styleElement);
-		styleRules = styleElement.sheet?.cssRules;
-	} else if (css instanceof CSSRuleList) {
-		styleRules = css;
-	}
-
+	let styleRules = createCSSOM(css);
 	if (!styleRules) {
+		console.warn('Failed to construct style rules. HTML will be incomplete.');
 		return output;
 	}
 
-	const separatedStyleRules = [] as [string, CSSStyleRule][];
-
-	// Filter and format the supplied style rules.
-	for (const [index, rule] of Object.entries(styleRules) as [string, (CSSStyleRule | CSSMediaRule)][]) {
-		// Fetch the content of import rules.
-		if (rule instanceof CSSImportRule && new URL(rule.href).pathname.endsWith('.css')) {
-			try {
-				const resource = await fetch(rule.href);
-				if (resource.status !== 200) {
-					throw new Error(`Response status was ${resource.status}.`);
-				}
-				// Recursively convert all imported stylesheets to HTML.
-				const resourceCss = await resource.text();
-				const resourceHtml = await cssToHtml(resourceCss, options);
-				output.innerHTML += resourceHtml.innerHTML;
-			} catch (error) {
-				console.warn('Failed to fetch remote stylesheet:', rule.href, '-', error);
+	// Parse the CSSOM into individual rules.
+	const rules = new Array<Rule>();
+	const importSet = new Set<string>();
+	
+	async function parseRules (source: CSSRuleList, urlBase: string): Promise<void> {
+		let seenStyleRule = false;
+		for (const rule of Object.values(source!)) {
+			if (rule instanceof CSSStyleRule) {
+				seenStyleRule = true;
+				rules.push(new Rule(rule));
 			}
-		}
-
-		// Skip:
-		// - Non-style rules.
-		// - Rules including `*`.
-		// - Rules including `:` (that aren't `nth-child` or `nth-of-type`).
-		if (
-			!(rule instanceof CSSStyleRule)
-			|| rule.selectorText.includes('*')
-			|| (rule.selectorText.includes(':')
-				&& !rule.selectorText.includes(':first-child')
-				&& !rule.selectorText.includes(':nth-child')
-				&& !rule.selectorText.includes(':last-child')
-				&& !rule.selectorText.includes(':first-of-type')
-				&& !rule.selectorText.includes(':nth-of-type')
-				&& !rule.selectorText.includes(':last-of-type')
-			)
-		) {
-			continue;
-		}
-
-		// Format any combinators in the rule's selector.
-		const selector = rule.selectorText
-			.replaceAll(/([\w-])\s+([\w-\.\#])/g, '$1>$2')	// Replace child combinator spaces with `>`.
-			.replaceAll(/>{2,}/g, '>')						// Remove excess `>`.
-			.replaceAll(' ', '');							// Remove excess spaces.
-
-		// Separate selectors with commas into their own style rules.
-		const splitSelector = selector.split(',');
-		for (const subSelector of splitSelector) {
-			separatedStyleRules.push([subSelector, rule]);
+			// Fetch the content of imported stylesheets.
+			else if (rule instanceof CSSImportRule && !seenStyleRule && options.imports === 'include') {
+				const url = new URL(rule.href, urlBase);
+				if (url.pathname.endsWith('.css') && !importSet.has(url.href)) {
+					importSet.add(url.href);
+					const resource = await fetch(url.href);
+					if (resource.status !== 200) throw new Error(`Response status for stylesheet "${url.href}" was ${resource.status}.`);
+					const text = await resource.text();
+					const importedRule = createCSSOM(text);
+					if (importedRule) await parseRules(importedRule, url.href);
+				}
+			}
 		}
 	}
+	await parseRules(styleRules, window.location.href);
 
-	// Convert each rule into an HTML element, then add it to the output DOM.
-	for (let [selector, rule] of separatedStyleRules) {
-		// This object describes an element based on pieces of a selector.
-		const descriptor = {
-			previousElement: undefined as HTMLElement | undefined,
-			previousCharacter: '',
-			combinator: '' as '' | Combinator,
-			addressCharacter: '' as '' | '.' | '#',
-			classes: [''],
-			id: '',
-			tag: '',
-			position: {
-				type: '' as 'child' | 'type',
-				index: 0
-			},
-			add: (character: string): void => {
-				if (!descriptor.addressCharacter) {
-					descriptor.tag += character;
+	// Populate the DOM.
+	for (const { rule, selectorAst } of rules) {
+		// Traverse each rule nest of the selector AST.
+		for (const r of selectorAst.rules) {
+			const nest = new Array<Descriptor>();
+			let invalidNest = false;
+			// Create a descriptor for each of the nested selectors.
+			let next: AstRule | undefined = r;
+			do {
+				const descriptor = new Descriptor(next);
+				if (descriptor.invalid) {
+					invalidNest = true;
+					next = undefined;
+					break;
 				}
-				else if (descriptor.addressCharacter === '.') {
-					descriptor.classes[descriptor.classes.length - 1] += character;
+				nest.push(descriptor);
+				next = next.nestedRule;
+			} while (next);
+			// Skip this nest if it contains any invalid descriptors.
+			if (invalidNest) continue;
+			// Set the content of the last descriptor in the nest.
+			const content = rule.style.content;
+			nest[nest.length - 1].content = content;
+			// Add each descriptor in the nest to the DOM.
+			let nestIndex = 0;
+			for (const descriptor of nest) {
+				// Get a reference to the appropriate parent element.
+				let parent: HTMLElement = output;
+				if (nestIndex <= 0) {
+					parent = output;
+				} else if (descriptor.combinator === '~' || descriptor.combinator === '+') {
+					parent = nest[nestIndex - 1].element.parentElement ?? output;
+				} else if (descriptor.combinator === '>' || descriptor.combinator === ' ') {
+					parent = nest[nestIndex - 1].element;
 				}
-				else if (descriptor.addressCharacter === '#') {
-					descriptor.id += character;
-				}
-				descriptor.previousCharacter = character;
-			},
-			clear: (): void => {
-				descriptor.previousCharacter = '';
-				descriptor.addressCharacter = '';
-				descriptor.classes = [''];
-				descriptor.id = '';
-				descriptor.tag = '';
-			},
-			matchesElement: (element: Element): boolean => {
-				const descriptorTag = (descriptor.tag.toUpperCase() || 'DIV');
-				const descriptorClasses = descriptor.classes.filter((c) => Boolean(c));
-				// Compare tag, id, and classlist length.
-				if (
-					element.tagName !== descriptorTag
-					|| element.id !== descriptor.id
-					|| element.classList.length !== descriptorClasses.length
-				) {
-					return false;
-				}
-				// Compare classlists.
-				const differingClasses = descriptorClasses.filter((c) => !element.classList.contains(c));
-				return !differingClasses.length;
-			}
-		};
-
-		function addElementToOutput (): void {
-			if (options.duplicates !== 'preserve') {
-				// If an identical element already exists, skip adding the new element.
-				const existingElements = Array.from(
-					(descriptor.combinator === '>' ?
-					descriptor.previousElement?.children :
-					descriptor.previousElement?.parentElement?.children) ?? output.children
-				);
-				const matchingElement = existingElements.find((element) => descriptor.matchesElement(element));
-				if (matchingElement) {
-					// Reference the matching element so properties such as `content` can cascade.
-					descriptor.previousElement = matchingElement as HTMLElement;
-					return;
-				}
-			}
-			// Create the new element.
-			const newElement = document.createElement(descriptor.tag || 'div');
-			// Add the classes.
-			for (const c of descriptor.classes) {
-				(c && newElement.classList.add(c));
-			}
-			// Add the ID.
-			if (descriptor.id) {
-				newElement.id = descriptor.id;
-			}
-			// Add the new element to the DOM.
-			if (descriptor.previousElement) {
-				// Child.
-				if (descriptor.combinator === '>') {
-					descriptor.previousElement.append(newElement);
-				}
-				// Sibling.
-				else {
-					descriptor.previousElement.parentElement?.append(newElement);
-				}
-			}
-			else {
-				output.append(newElement);
-			}
-			// Update the descriptor.
-			descriptor.previousElement = newElement;
-		}
-
-		function addElementToOutputWithFill (childType: 'child' | 'type', fillType: 'first' | 'nth' | 'last', fillAmount: number): void {
-			const desiredIndex = fillAmount - 1;
-
-			// Create the new element.
-			const newElement = document.createElement(descriptor.tag || 'div');
-			// Add the classes.
-			for (const c of descriptor.classes) {
-				(c && newElement.classList.add(c));
-			}
-			// Add the ID.
-			if (descriptor.id) {
-				newElement.id = descriptor.id;
-			}
-
-			// Get a reference to the parent element.
-			let parentElement = undefined as HTMLElement | undefined;
-			if (descriptor.previousElement) {
-				if (descriptor.combinator === '>') {
-					parentElement = descriptor.previousElement;
-				} else {
-					parentElement = descriptor.previousElement.parentElement ?? output;
-				}
-			} else {
-				parentElement = output;
-			}
-
-			if (!parentElement) {
-				return;
-			}
-
-			// Update the descriptor.
-			descriptor.previousElement = newElement;
-
-			if (fillType === 'first') {
-				// Check if there is a sibling element in the desired position.
-				const blockingSibling = parentElement.querySelector(childType === 'type' ? `${newElement.tagName}:first-of-type` : '*:first-child');
-				if (blockingSibling) {
-					parentElement.insertBefore(newElement, blockingSibling);
-					if (isFillerElement(blockingSibling) || (options.mergeNth !== 'no-merge' && mergeElements(blockingSibling, newElement))) {
-						blockingSibling.remove();
+				// Attach the element to the parent.
+				if (descriptor.position.explicit) {
+					const fromStart = descriptor.position.from === 'start';
+					// Check if there is a sibling element in the desired position.
+					let previousSiblings = 0;
+					let previousSiblingsNeedCounting = true;
+					const blockingSibling = parent.querySelector(descriptor.siblingSelector);
+					if (blockingSibling) {
+						const target = fromStart ? blockingSibling : blockingSibling.nextElementSibling;
+						if (isFillerElement(blockingSibling)) {
+							parent.insertBefore(descriptor.element, target);
+							blockingSibling.remove();
+						} else if (options.mergeNth !== 'no-merge' && mergeElements(descriptor.element, blockingSibling)) {
+							descriptor.element = blockingSibling as HTMLElement;
+							descriptor.content = descriptor.content;
+						} else {
+							parent.insertBefore(descriptor.element, target);
+						}
+						previousSiblings = 0;
+					} else if (descriptor.position.index > 1) {
+						previousSiblings = parent.childElementCount;
+						previousSiblingsNeedCounting = false;
+						parent[fromStart ? 'append' : 'prepend'](descriptor.element);
+					} else {
+						parent[fromStart ? 'prepend' : 'append'](descriptor.element);
+					}
+					// Fill duplicate elements if required.
+					if (descriptor.position.explicit && options.fill !== 'no-fill') {
+						const desiredIndex = descriptor.position.index - 1;
+						// Count the previous siblings.
+						if (previousSiblingsNeedCounting) {
+							let previousSibling = descriptor.element[fromStart ? 'previousElementSibling' : 'nextElementSibling'];
+							while (previousSibling && previousSiblings < desiredIndex) {
+								previousSibling = previousSibling?.[fromStart ? 'previousElementSibling' : 'nextElementSibling'];
+								if (descriptor.position.type === 'type' && previousSibling?.tagName !== descriptor.element.tagName) {
+									continue;
+								}
+								previousSiblings++;
+							}
+						}
+						// Fill duplicate elements up to the desired position.
+						const duplicatesRequired = desiredIndex - previousSiblings;
+						for (let i = 0; i < duplicatesRequired; i++) {
+							// Create the duplicate element.
+							const duplicateElement = descriptor.element.cloneNode();
+							if (!(duplicateElement instanceof HTMLElement)) continue;
+							// Remove the ID.
+							duplicateElement.removeAttribute('id');
+							// Make a note of the duplicate element.
+							fillerElements.push(duplicateElement);
+							// Add the duplicate element to the DOM.
+							parent.insertBefore(duplicateElement, fromStart ? descriptor.element : descriptor.element.nextElementSibling);
+						}
 					}
 				} else {
-					parentElement.prepend(newElement);
-				}
-				return;
-			}
-
-			if (fillType === 'last') {
-				// Check if there is a sibling element in the desired position.
-				const blockingSibling = parentElement.querySelector(childType === 'type' ? `${newElement.tagName}:last-of-type` : `${newElement.tagName}:last-child`);
-				if (blockingSibling) {
-					parentElement.insertBefore(newElement, blockingSibling.nextElementSibling);
-					if (isFillerElement(blockingSibling) || (options.mergeNth !== 'no-merge' && mergeElements(blockingSibling, newElement))) {
-						blockingSibling.remove();
+					if (options.duplicates !== 'preserve') {
+						// If an identical element already exists, skip adding the new element.
+						const existingElements = Array.from(parent.children);
+						const matchedElement = existingElements.find((element) => elementsAreComparable(descriptor.element, element));
+						if (matchedElement instanceof HTMLElement && mergeElements(descriptor.element, matchedElement)) {
+							// Reference the matching element so properties such as `content` can cascade.
+							descriptor.element = matchedElement;
+							descriptor.content = descriptor.content;
+						} else {
+							parent.append(descriptor.element);
+						}
+					} else {
+						parent.append(descriptor.element);
 					}
-				} else {
-					parentElement.append(newElement);
 				}
-				return;
-			}
-
-			// Check if there is a sibling element in the desired position.
-			const blockingSibling = parentElement.querySelector(childType === 'type' ? `${newElement.tagName}:nth-of-type(${fillAmount})` : `:nth-child(${fillAmount})`);
-			if (blockingSibling) {
-				parentElement.insertBefore(newElement, blockingSibling);
-				if (isFillerElement(blockingSibling) || (options.mergeNth !== 'no-merge' && mergeElements(blockingSibling, newElement))) {
-					blockingSibling.remove();
-				}
-				return;
-			}
-
-			// Add the element to the DOM.
-			parentElement.append(newElement);
-
-			if (options.fill !== 'no-fill') {
-				// Count the previous siblings.
-				let previousSiblings = 0;
-				let previousSibling = newElement.previousElementSibling;
-				while (previousSibling && previousSiblings < desiredIndex) {
-					previousSibling = previousSibling?.previousElementSibling;
-					if (childType === 'type' && previousSibling?.tagName !== newElement.tagName) {
-						continue;
-					}
-					previousSiblings++;
-				}
-
-				// Fill duplicate elements up to the desired position.
-				const duplicatesRequired = desiredIndex - previousSiblings;
-				for (let i = 0; i < duplicatesRequired; i++) {
-					// Create the duplicate element.
-					const duplicateElement = newElement.cloneNode() as HTMLElement;
-					// Remove the ID.
-					duplicateElement.removeAttribute('id');
-					// Make a note of the duplicate element.
-					fillerElements.push(duplicateElement);
-					// Add the duplicate element to the DOM.
-					parentElement.insertBefore(duplicateElement, newElement);
-				}
-			}
-		}
-
-		// For every character in the selector, plus a stop character to indicate the end of the selector.
-		selector += '%';
-		for (let i = 0; i < selector.length; i++) {
-			const character = selector[i];
-			// The start of a new selector.
-			if (!descriptor.previousCharacter) {
-				if (/(?:\+|~|>)/.test(character)) {
-					descriptor.combinator = character as Combinator;
-				} else if (character === '.' || character === '#') {
-					descriptor.addressCharacter = character;
-				} else {
-					descriptor.add(character);
-				}
-			}
-			// The character is alphanumeric.
-			else if (/(?:\w|-)/.test(character)) {
-				descriptor.add(character);
-			}
-			// The character is a dot.
-			else if (character === '.') {
-				descriptor.addressCharacter = character;
-				descriptor.classes.push('');
-			}
-			// The character is a hash.
-			else if (character === '#') {
-				descriptor.addressCharacter = character;
-			}
-			// The character is a combinator.
-			else if (/(?:\+|~|>)/.test(character)) {
-				addElementToOutput();
-				descriptor.clear();
-				descriptor.combinator = character as Combinator;
-			}
-			// The character is a colon.
-			else if (character === ':') {
-				const nthSelector = selector.substring(i + 1);
-				const pseudoSelector =
-					/^(first-child|first-of-type)/i.exec(nthSelector)
-					?? /^(nth-child|nth-of-type)\(([0-9]+)\)/i.exec(nthSelector)
-					?? /^(last-child|last-of-type)/i.exec(nthSelector);
-				if (pseudoSelector) {
-					const childType = pseudoSelector[1].includes('type') ? 'type' : 'child';
-					const fillType = pseudoSelector[1].split('-')[0] as 'first' | 'nth' | 'last';
-					addElementToOutputWithFill(childType, fillType, parseInt(pseudoSelector[2]) || 0);
-					i += pseudoSelector[0].length;
-				}
-				descriptor.clear();
-			}
-			// The character is none of the above.
-			else {
-				addElementToOutput();
-				descriptor.clear();
-			}
-		}
-
-		// If the rule has a `content` property, populate the element with the specified content appropriately.
-		let content = rule.style.content;
-		const element = descriptor.previousElement;
-		if (content && element) {
-			// Strip any quote marks from around the content string.
-			if (/(?:'|")/.test(content.charAt(0)) && /(?:'|")/.test(content.charAt(content.length - 1))) {
-				content = content.substring(1, content.length - 1);
-			}
-			// Place the content in the `href` property of anchor elements.
-			if (element instanceof HTMLAnchorElement) {
-				element.href = content;
-			}
-			// Place the content in the `src` property of audio, iframe, image, and video elements.
-			else if (
-				element instanceof HTMLAudioElement
-				|| element instanceof HTMLIFrameElement
-				|| element instanceof HTMLImageElement
-				|| element instanceof HTMLVideoElement
-			) {
-				element.src = content;
-			}
-			// Place the content in the `placeholder` property of input and textarea elements.
-			else if (
-				element instanceof HTMLInputElement
-				|| element instanceof HTMLTextAreaElement
-			) {
-				element.placeholder = content;
-			}
-			// Use the content as inner-text and place it in the `value` property of option elements.
-			else if (element instanceof HTMLOptionElement) {
-				element.innerText = content;
-				element.value = content;
-			}
-			// Place the content in the `value` property of select elements.
-			else if (element instanceof HTMLSelectElement) {
-				element.value = content;
-			}
-			// Use the content as inner-text for all other elements.
-			else {
-				element.innerText = content;
+				nestIndex++;
 			}
 		}
 	}
