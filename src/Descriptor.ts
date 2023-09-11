@@ -68,6 +68,11 @@ export class Descriptor {
 		}
 		this.element = document.createElement(tag);
 
+		// Check for pseudo elements.
+		if (rule.pseudoElement) {
+			this.invalid = true
+		}
+
 		if (this.invalid) {
 			return;
 		}
