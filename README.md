@@ -1,5 +1,7 @@
 # CSS-to-HTML
 
+[![Unit Tests](https://github.com/CSS-Canvas/CSS-to-HTML/actions/workflows/unit-tests.yml/badge.svg)](https://github.com/CSS-Canvas/CSS-to-HTML/actions/workflows/unit-tests.yml) ![npm](https://img.shields.io/npm/dt/css-to-html) ![npm bundle size](https://img.shields.io/bundlephobia/min/css-to-html)
+
 Generate HTML documents from just CSS.
 
 ```bash
