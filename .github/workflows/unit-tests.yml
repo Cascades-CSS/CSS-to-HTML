@@ -17,6 +17,8 @@ jobs:
         node-version: 18
     - name: Install Dependencies
       run: npm ci
+    - name: Install Test Server Dependencies
+      run: cd test-server && npm ci
     - name: Install Playwright Browsers
       run: npx playwright install --with-deps
     - name: Run Unit Tests
