@@ -11,21 +11,15 @@ npm i css-to-html
 
 ## Usage
 
-From a CSS string.
 ```javascript
 import { cssToHtml } from 'css-to-html';
 
+// From a CSS string:
 const css = 'p { color: purple; }';
-
 const html = await cssToHtml(css);
-```
 
-Or from a style element:
-```javascript
-import { cssToHtml } from 'css-to-html';
-
+// Or from a style element:
 const css = document.querySelector('style').sheet.cssRules;
-
 const html = await cssToHtml(css);
 ```
 
