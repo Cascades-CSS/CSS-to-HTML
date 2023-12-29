@@ -4,12 +4,14 @@
 
 Generate HTML documents from just CSS.
 
-```bash
-npm i css-to-html
-```
+Give it a try on [Cascades](https://tiny.cascades.app/) ✨
 
 
 ## Usage
+
+```sh
+npm i css-to-html
+```
 
 ```javascript
 import { cssToHtml } from 'css-to-html';
