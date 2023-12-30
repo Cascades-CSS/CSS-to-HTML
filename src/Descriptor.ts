@@ -70,14 +70,12 @@ export class Descriptor {
 
 		// Check for pseudo elements.
 		if (rule.pseudoElement) {
-			this.invalid = true
+			this.invalid = true;
 		}
 
-		if (this.invalid) {
-			return;
-		}
+		if (this.invalid) return;
 
-		// Set the ids.
+		// Set the IDs.
 		if (rule.ids) {
 			this.element.id = rule.ids.join(' ');
 		}
