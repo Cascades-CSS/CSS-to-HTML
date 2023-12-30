@@ -13,12 +13,15 @@ const css = `
 	content: 'A';
 	box-sizing: border-box;
 }
-@media screen and (max-width: 200px) {}
-div {
+:is(html, body, main) {
 	content: 'B';
 }
-div:hover {
+@media screen and (max-width: 200px) {}
+div {
 	content: 'C';
+}
+div:hover {
+	content: 'D';
 }
 @media screen and (max-width: 800px) {}
 .ignored > section::-webkit-scrollbar {
@@ -38,5 +41,5 @@ test('Ignored', async ({ page }) => {
 
 	// That element should have specific text content.
 	const content = await element?.innerHTML();
-	expect(content).toBe('B');
+	expect(content).toBe('C');
 });
