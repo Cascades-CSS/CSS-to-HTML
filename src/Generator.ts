@@ -1,5 +1,5 @@
 import { createParser } from 'css-selector-parser';
-import type { AstRule } from 'css-selector-parser';
+import type { AstRule, AstSelector } from 'css-selector-parser';
 import * as DOMPurify from 'dompurify';
 import { Descriptor } from './Descriptor.js';
 import { createCSSOM, elementsAreComparable, mergeElements } from './Utility.js';
@@ -15,8 +15,8 @@ export class Options {
 const parse = createParser({ syntax: 'progressive' });
 
 class Rule {
-	rule;
-	selectorAst;
+	rule: CSSStyleRule;
+	selectorAst: AstSelector;
 
 	constructor (rule: CSSStyleRule) {
 		this.rule = rule;

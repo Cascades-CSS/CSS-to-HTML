@@ -44,8 +44,8 @@ function parsePositionFormula (a: number, b: number): number | false {
  * Describes an element based on pieces of a selector.
  */
 export class Descriptor {
-	public rule;
-	public element;
+	public rule: AstRule;
+	public element: HTMLElement;
 	public combinator = '';
 	public position = {
 		explicit: false,
