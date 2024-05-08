@@ -1,5 +1,6 @@
 import { createParser } from 'css-selector-parser';
 import type { AstRule } from 'css-selector-parser';
+import * as DOMPurify from 'dompurify';
 import { Descriptor } from './Descriptor.js';
 import { createCSSOM, elementsAreComparable, mergeElements } from './Utility.js';
 
@@ -179,6 +180,14 @@ export async function cssToHtml (css: CSSRuleList | string, options: Options = {
 				nestIndex++;
 			}
 		}
+	}
+
+	if (options.sanitize === 'all') {
+		const cleanHtml = DOMPurify.sanitize(output, { RETURN_DOM: true });
+		if (cleanHtml instanceof HTMLBodyElement) return cleanHtml;
+		const body = document.createElement('body');
+		body.append(cleanHtml);
+		return body;
 	}
 
 	return output;
