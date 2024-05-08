@@ -8,6 +8,7 @@ export class Options {
 	fill?: 'fill' | 'no-fill';
 	imports?: 'include' | 'style-only';
 	mergeNth?: 'merge' | 'no-merge';
+	sanitize?: 'all' | 'imports' | 'off';
 }
 
 const parse = createParser({ syntax: 'progressive' });

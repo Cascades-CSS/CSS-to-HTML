@@ -73,6 +73,9 @@ An options object can be passed as the second argument to `cssToHtml()` to custo
 | `fill`       | `fill`       * | Fill the DOM with duplicate elements up to the desired location. Eg: <br/> `span#fourth:nth-child(4) {}` <br/> Will become: <br/> `<span></span><span></span><span></span><span id="fourth"></span>`. |
 |              | `no-fill`      | Don't fill. Eg: <br/> `span#fourth:nth-child(4) {}` <br/> Will become: <br/> `<span id="fourth"></span>`. |
 | `imports`    | `include`      | Fetch imported stylesheets and include them in the HTML generation process. |
-|              | `style-only` * | Ignore `@import` rules. |
+|              | `style-only` * | Ignore `@import` rules when generating HTML. |
 | `mergeNth`   | `merge`      * | Elements generated from `:nth-` selectors will be merged with any similar element occupying the desired location. |
 |              | `no-merge`     | These elements will not be merged. |
+| `sanitize`   | `all` *        | Sanitize the generated HTML using DOMPurify. |
+|              | `imports`      | Only sanitize HTML generated from imported stylesheets. |
+|              | `off`          | Don't sanitize the generated HTML. |
