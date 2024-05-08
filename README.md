@@ -61,6 +61,20 @@ Output:
 </body>
 ```
 
+> [!NOTE]
+> `cssToHtml` always returns an [`HTMLBodyElement`](https://developer.mozilla.org/en-US/docs/Web/API/HTMLBodyElement). To get the string representation of the generated HTML, use [`outerHtml`](https://developer.mozilla.org/en-US/docs/Web/API/Element/outerHTML). For example:
+>
+> Input:
+> ```javascript
+> const html = await cssToHtml('h1#greeting { content: "Hello!"; }');
+> console.log( html.outerHtml );
+> ```
+>
+> Output:
+> ```javascript
+> '<h1 id="greeting">Hello!</h1>'
+> ```
+
 
 ## Options
 
