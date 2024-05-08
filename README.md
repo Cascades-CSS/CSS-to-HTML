@@ -1,6 +1,6 @@
 # <img width="48" src="https://github.com/Cascades-CSS/CSS-to-HTML/raw/main/assets/logo.svg"> CSS-to-HTML
 
-[![Unit Tests](https://github.com/CSS-Canvas/CSS-to-HTML/actions/workflows/unit-tests.yml/badge.svg)](https://github.com/CSS-Canvas/CSS-to-HTML/actions/workflows/unit-tests.yml) ![npm](https://img.shields.io/npm/dt/css-to-html) ![npm bundle size](https://img.shields.io/bundlephobia/min/css-to-html)
+[![Unit Tests](https://github.com/CSS-Canvas/CSS-to-HTML/actions/workflows/unit-tests.yml/badge.svg)](https://github.com/CSS-Canvas/CSS-to-HTML/actions/workflows/unit-tests.yml) [![npm version](https://badge.fury.io/js/css-to-html.svg)](https://www.npmjs.com/package/css-to-html) [![npm](https://img.shields.io/npm/dt/css-to-html)](https://www.npmjs.com/package/css-to-html) [![npm bundle size](https://img.shields.io/bundlephobia/min/css-to-html)](https://www.npmjs.com/package/css-to-html)
 
 Generate HTML documents from just CSS.
 
