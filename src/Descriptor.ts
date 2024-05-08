@@ -1,4 +1,5 @@
 import type { AstRule } from 'css-selector-parser';
+import * as DOMPurify from 'dompurify';
 import { replaceTextNode } from './Utility.js';
 
 /**
@@ -55,9 +56,11 @@ export class Descriptor {
 	};
 	public invalid = false;
 	private rawContent = '';
+	private sanitize = false;
 
-	constructor (rule: AstRule, content?: string) {
+	constructor (rule: AstRule, content?: string, sanitize = false) {
 		this.rule = rule;
+		this.sanitize = sanitize;
 
 		// Create the element.
 		let tag = 'div';
@@ -94,6 +97,11 @@ export class Descriptor {
 				}
 				this.element.setAttribute(attribute.name, value);
 			}
+		}
+
+		// Sanitize the element.
+		if (this.sanitize) {
+			this.element = DOMPurify.sanitize(this.element, { RETURN_DOM: true });
 		}
 
 		// Set the content.
@@ -169,6 +177,11 @@ export class Descriptor {
 		// Use the content as inner-text for all other elements.
 		else {
 			replaceTextNode(this.element, value);
+		}
+
+		// Sanitize the element.
+		if (this.sanitize) {
+			this.element = DOMPurify.sanitize(this.element, { RETURN_DOM: true });
 		}
 	}
 
