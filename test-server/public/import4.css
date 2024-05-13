@@ -1,0 +1,3 @@
+img.dangerous[onload="console.log('danger')"] {
+	content: 'image.png';
+}
