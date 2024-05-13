@@ -184,7 +184,7 @@ export async function cssToHtml (css: CSSRuleList | string, options: Options = {
 		}
 	}
 
-	if (options.sanitize === 'all') {
+	if (options.sanitize !== 'off' && options.sanitize !== 'imports') {
 		const cleanHtml = DOMPurify.sanitize(output, { RETURN_DOM: true });
 		if (cleanHtml instanceof HTMLBodyElement) return cleanHtml;
 		const body = document.createElement('body');
