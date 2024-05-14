@@ -2,7 +2,7 @@
  * Verify that DOM sanitization is working.
  */
 
-import { test, expect } from '@playwright/test';
+import { test, expect, type Page } from '@playwright/test';
 import { cssToHtml } from '../src/index';
 
 const css = `
@@ -73,7 +73,7 @@ test('Sanitize Imports Only', async ({ page }) => {
 
 	// The img should not have an `onload` attribute.
 	const imgAttribute = await imgElement?.getAttribute('onload');
-	expect(imgAttribute).not.toBeDefined();
+	expect(imgAttribute).toBeNull();
 
 	// There should be exactly one div element.
 	const div = page.locator('div');
@@ -90,10 +90,7 @@ test('Sanitize Imports Only', async ({ page }) => {
 	expect(divAttribute).toBe('console.log(\'foo\')');
 });
 
-test('Sanitize Everything', async ({ page }) => {
-	await page.goto('http://localhost:5173/');
-	const body = await page.evaluate(async (css1) => { document.body = await cssToHtml(css1, { imports: 'include', sanitize: 'all' }); return document.body.outerHTML; }, css);
-
+async function expectEverythingToBeSanitized (page: Page): Promise<void> {
 	// The body should have exactly two direct children.
 	const bodyDirectChildren = page.locator('body > *');
 	expect(await bodyDirectChildren.count()).toBe(2);
@@ -112,7 +109,7 @@ test('Sanitize Everything', async ({ page }) => {
 
 	// The img should not have an `onload` attribute.
 	const imgAttribute = await imgElement?.getAttribute('onload');
-	expect(imgAttribute).not.toBeDefined();
+	expect(imgAttribute).toBeNull();
 
 	// There should be exactly one div element.
 	const div = page.locator('div');
@@ -126,5 +123,19 @@ test('Sanitize Everything', async ({ page }) => {
 
 	// The div should not have an `onclick` attribute.
 	const divAttribute = await divElement?.getAttribute('onclick');
-	expect(divAttribute).not.toBeDefined();
+	expect(divAttribute).toBeNull();
+}
+
+test('Sanitize Everything', async ({ page }) => {
+	await page.goto('http://localhost:5173/');
+	const body = await page.evaluate(async (css1) => { document.body = await cssToHtml(css1, { imports: 'include', sanitize: 'all' }); return document.body.outerHTML; }, css);
+
+	await expectEverythingToBeSanitized(page);
+});
+
+test('Sanitize Everything By Default', async ({ page }) => {
+	await page.goto('http://localhost:5173/');
+	const body = await page.evaluate(async (css1) => { document.body = await cssToHtml(css1, { imports: 'include' }); return document.body.outerHTML; }, css);
+
+	await expectEverythingToBeSanitized(page);
 });
