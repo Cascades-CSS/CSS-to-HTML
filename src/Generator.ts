@@ -1,23 +1,26 @@
 import { createParser } from 'css-selector-parser';
-import type { AstRule } from 'css-selector-parser';
+import type { AstRule, AstSelector } from 'css-selector-parser';
 import { Descriptor } from './Descriptor.js';
-import { createCSSOM, elementsAreComparable, mergeElements } from './Utility.js';
+import { createCSSOM, elementsAreComparable, mergeElements, sanitizeElement } from './Utility.js';
 
 export class Options {
 	duplicates?: 'preserve' | 'remove';
 	fill?: 'fill' | 'no-fill';
 	imports?: 'include' | 'style-only';
 	mergeNth?: 'merge' | 'no-merge';
+	sanitize?: 'all' | 'imports' | 'off';
 }
 
 const parse = createParser({ syntax: 'progressive' });
 
 class Rule {
-	rule;
-	selectorAst;
+	rule: CSSStyleRule;
+	sanitize: boolean;
+	selectorAst: AstSelector;
 
-	constructor (rule: CSSStyleRule) {
+	constructor (rule: CSSStyleRule, sanitize = false) {
 		this.rule = rule;
+		this.sanitize = sanitize;
 		this.selectorAst = parse(rule.selectorText);
 	}
 }
@@ -47,12 +50,12 @@ export async function cssToHtml (css: CSSRuleList | string, options: Options = {
 	const rules = new Array<Rule>();
 	const importSet = new Set<string>();
 	
-	async function parseRules (source: CSSRuleList, urlBase: string): Promise<void> {
+	async function parseRules (source: CSSRuleList, urlBase: string, sanitize?: boolean): Promise<void> {
 		let seenStyleRule = false;
 		for (const rule of Object.values(source!)) {
 			if (rule instanceof CSSStyleRule) {
 				seenStyleRule = true;
-				rules.push(new Rule(rule));
+				rules.push(new Rule(rule, sanitize));
 			}
 			// Fetch the content of imported stylesheets.
 			else if (rule instanceof CSSImportRule && !seenStyleRule && options.imports === 'include') {
@@ -63,7 +66,7 @@ export async function cssToHtml (css: CSSRuleList | string, options: Options = {
 					if (resource.status !== 200) throw new Error(`Response status for stylesheet "${url.href}" was ${resource.status}.`);
 					const text = await resource.text();
 					const importedRule = createCSSOM(text);
-					if (importedRule) await parseRules(importedRule, url.href);
+					if (importedRule) await parseRules(importedRule, url.href, options.sanitize === 'imports');
 				}
 			}
 		}
@@ -71,7 +74,7 @@ export async function cssToHtml (css: CSSRuleList | string, options: Options = {
 	await parseRules(styleRules, window.location.href);
 
 	// Populate the DOM.
-	for (const { rule, selectorAst } of rules) {
+	for (const { rule, sanitize, selectorAst } of rules) {
 		// Traverse each rule nest of the selector AST.
 		for (const r of selectorAst.rules) {
 			const nest = new Array<Descriptor>();
@@ -79,7 +82,7 @@ export async function cssToHtml (css: CSSRuleList | string, options: Options = {
 			// Create a descriptor for each of the nested selectors.
 			let next: AstRule | undefined = r;
 			do {
-				const descriptor = new Descriptor(next);
+				const descriptor = new Descriptor(next, undefined, sanitize);
 				if (descriptor.invalid) {
 					invalidNest = true;
 					next = undefined;
@@ -178,6 +181,14 @@ export async function cssToHtml (css: CSSRuleList | string, options: Options = {
 				nestIndex++;
 			}
 		}
+	}
+
+	if (options.sanitize !== 'off' && options.sanitize !== 'imports') {
+		const cleanHtml = sanitizeElement(output);
+		if (cleanHtml instanceof HTMLBodyElement) return cleanHtml;
+		const body = document.createElement('body');
+		body.append(cleanHtml);
+		return body;
 	}
 
 	return output;

@@ -1,3 +1,5 @@
+import DOMPurify from 'dompurify';
+
 /**
  * Create a CSS Object Model from a string of CSS.
  * @param css The CSS string.
@@ -79,4 +81,17 @@ export function replaceTextNode (element: HTMLElement | Element, value: string):
     } else {
         element.append(value);
     }
+}
+
+/**
+ * Sanitize a given HTML element with DOMPurify.
+ * @param element The element to sanitize.
+ * @returns A sanitized copy of the given element.
+ */
+export function sanitizeElement (element: HTMLElement): HTMLElement {
+    const sanitizedElement = DOMPurify.sanitize(element, { RETURN_DOM: true });
+    if (sanitizedElement instanceof HTMLBodyElement && !(element instanceof HTMLBodyElement)) {
+        return sanitizedElement.firstElementChild as HTMLElement;
+    }
+    return sanitizedElement;
 }

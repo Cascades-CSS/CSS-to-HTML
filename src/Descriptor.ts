@@ -1,5 +1,5 @@
 import type { AstRule } from 'css-selector-parser';
-import { replaceTextNode } from './Utility.js';
+import { replaceTextNode, sanitizeElement } from './Utility.js';
 
 /**
  * Valid positioning pseudo classes.
@@ -44,8 +44,8 @@ function parsePositionFormula (a: number, b: number): number | false {
  * Describes an element based on pieces of a selector.
  */
 export class Descriptor {
-	public rule;
-	public element;
+	public rule: AstRule;
+	public element: HTMLElement;
 	public combinator = '';
 	public position = {
 		explicit: false,
@@ -55,9 +55,11 @@ export class Descriptor {
 	};
 	public invalid = false;
 	private rawContent = '';
+	private sanitize = false;
 
-	constructor (rule: AstRule, content?: string) {
+	constructor (rule: AstRule, content?: string, sanitize = false) {
 		this.rule = rule;
+		this.sanitize = sanitize;
 
 		// Create the element.
 		let tag = 'div';
@@ -94,6 +96,11 @@ export class Descriptor {
 				}
 				this.element.setAttribute(attribute.name, value);
 			}
+		}
+
+		// Sanitize the element.
+		if (this.sanitize) {
+			this.element = sanitizeElement(this.element);
 		}
 
 		// Set the content.
@@ -169,6 +176,11 @@ export class Descriptor {
 		// Use the content as inner-text for all other elements.
 		else {
 			replaceTextNode(this.element, value);
+		}
+
+		// Sanitize the element.
+		if (this.sanitize) {
+			this.element = sanitizeElement(this.element);
 		}
 	}
 
