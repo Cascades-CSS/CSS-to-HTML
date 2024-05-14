@@ -2,6 +2,8 @@
  * Verify that DOM sanitization is working.
  */
 
+// TODO: Make these tests more comprehensive. They should cover a wider range of sanitization cases.
+
 import { test, expect, type Page } from '@playwright/test';
 import { cssToHtml } from '../src/index';
 
