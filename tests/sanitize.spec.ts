@@ -14,7 +14,7 @@ div.last[onclick="console.log('foo')"] {
 
 test('Sanitization Off', async ({ page }) => {
 	await page.goto('http://localhost:5173/');
-	const body = await page.evaluate(async (css1) => { document.body = await cssToHtml(css1, { imports: 'include', sanitize: 'off' }); return document.body.outerHTML; }, css);
+	const body = await page.evaluate(async (css) => { document.body = await cssToHtml(css, { imports: 'include', sanitize: 'off' }); return document.body.outerHTML; }, css);
 
 	// The body should have exactly two direct children.
 	const bodyDirectChildren = page.locator('body > *');
@@ -53,7 +53,7 @@ test('Sanitization Off', async ({ page }) => {
 
 test('Sanitize Imports Only', async ({ page }) => {
 	await page.goto('http://localhost:5173/');
-	const body = await page.evaluate(async (css1) => { document.body = await cssToHtml(css1, { imports: 'include', sanitize: 'imports' }); return document.body.outerHTML; }, css);
+	const body = await page.evaluate(async (css) => { document.body = await cssToHtml(css, { imports: 'include', sanitize: 'imports' }); return document.body.outerHTML; }, css);
 
 	// The body should have exactly two direct children.
 	const bodyDirectChildren = page.locator('body > *');
@@ -128,14 +128,14 @@ async function expectEverythingToBeSanitized (page: Page): Promise<void> {
 
 test('Sanitize Everything', async ({ page }) => {
 	await page.goto('http://localhost:5173/');
-	const body = await page.evaluate(async (css1) => { document.body = await cssToHtml(css1, { imports: 'include', sanitize: 'all' }); return document.body.outerHTML; }, css);
+	const body = await page.evaluate(async (css) => { document.body = await cssToHtml(css, { imports: 'include', sanitize: 'all' }); return document.body.outerHTML; }, css);
 
 	await expectEverythingToBeSanitized(page);
 });
 
 test('Sanitize Everything By Default', async ({ page }) => {
 	await page.goto('http://localhost:5173/');
-	const body = await page.evaluate(async (css1) => { document.body = await cssToHtml(css1, { imports: 'include' }); return document.body.outerHTML; }, css);
+	const body = await page.evaluate(async (css) => { document.body = await cssToHtml(css, { imports: 'include' }); return document.body.outerHTML; }, css);
 
 	await expectEverythingToBeSanitized(page);
 });
