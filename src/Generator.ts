@@ -1,8 +1,7 @@
 import { createParser } from 'css-selector-parser';
 import type { AstRule, AstSelector } from 'css-selector-parser';
-import * as DOMPurify from 'dompurify';
 import { Descriptor } from './Descriptor.js';
-import { createCSSOM, elementsAreComparable, mergeElements } from './Utility.js';
+import { createCSSOM, elementsAreComparable, mergeElements, sanitizeElement } from './Utility.js';
 
 export class Options {
 	duplicates?: 'preserve' | 'remove';
@@ -185,7 +184,7 @@ export async function cssToHtml (css: CSSRuleList | string, options: Options = {
 	}
 
 	if (options.sanitize !== 'off' && options.sanitize !== 'imports') {
-		const cleanHtml = DOMPurify.sanitize(output, { RETURN_DOM: true });
+		const cleanHtml = sanitizeElement(output);
 		if (cleanHtml instanceof HTMLBodyElement) return cleanHtml;
 		const body = document.createElement('body');
 		body.append(cleanHtml);

@@ -1,6 +1,5 @@
 import type { AstRule } from 'css-selector-parser';
-import * as DOMPurify from 'dompurify';
-import { replaceTextNode } from './Utility.js';
+import { replaceTextNode, sanitizeElement } from './Utility.js';
 
 /**
  * Valid positioning pseudo classes.
@@ -101,7 +100,7 @@ export class Descriptor {
 
 		// Sanitize the element.
 		if (this.sanitize) {
-			this.element = DOMPurify.sanitize(this.element, { RETURN_DOM: true });
+			this.element = sanitizeElement(this.element);
 		}
 
 		// Set the content.
@@ -181,7 +180,7 @@ export class Descriptor {
 
 		// Sanitize the element.
 		if (this.sanitize) {
-			this.element = DOMPurify.sanitize(this.element, { RETURN_DOM: true });
+			this.element = sanitizeElement(this.element);
 		}
 	}
 
