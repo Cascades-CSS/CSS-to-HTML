@@ -76,6 +76,6 @@ An options object can be passed as the second argument to `cssToHtml()` to custo
 |              | `style-only` * | Ignore `@import` rules when generating HTML. |
 | `mergeNth`   | `merge`      * | Elements generated from `:nth-` selectors will be merged with any similar element occupying the desired location. |
 |              | `no-merge`     | These elements will not be merged. |
-| `sanitize`   | `all` *        | Sanitize the generated HTML using DOMPurify. |
-|              | `imports`      | Only sanitize HTML generated from imported stylesheets. |
+| `sanitize`   | `all`        * | Sanitize the generated HTML using [DOMPurify](https://github.com/cure53/DOMPurify). |
+|              | `imports`      | Only sanitize the HTML generated from imported stylesheets. |
 |              | `off`          | Don't sanitize the generated HTML. |
