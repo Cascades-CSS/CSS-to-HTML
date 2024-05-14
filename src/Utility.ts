@@ -90,7 +90,7 @@ export function replaceTextNode (element: HTMLElement | Element, value: string):
  */
 export function sanitizeElement (element: HTMLElement): HTMLElement {
     const sanitizedElement = DOMPurify.sanitize(element, { RETURN_DOM: true });
-    if (sanitizedElement.tagName.toLowerCase() === 'body' && element.tagName.toLowerCase() !== 'body') {
+    if (sanitizedElement instanceof HTMLBodyElement && !(element instanceof HTMLBodyElement)) {
         return sanitizedElement.firstElementChild as HTMLElement;
     }
     return sanitizedElement;
