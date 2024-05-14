@@ -18,6 +18,7 @@ jobs:
           ignored,
           import,
           nth-child,
+          sanitize,
           selector
         ]
     steps:
