@@ -15,6 +15,8 @@ div.last[onclick="console.log('foo')"] {
 `;
 
 test('Sanitization Off', async ({ page }) => {
+	const consoleMessages = new Array<string>();
+	page.on('console', message => consoleMessages.push(message.text()));
 	await page.goto('http://localhost:5173/');
 	const body = await page.evaluate(async (css) => { document.body = await cssToHtml(css, { imports: 'include', sanitize: 'off' }); return document.body.outerHTML; }, css);
 
@@ -34,9 +36,14 @@ test('Sanitization Off', async ({ page }) => {
 	const imgElement = await img.elementHandle();
 	expect(imgElement).toBeTruthy();
 
-	// The img should have an `onload` attribute.
-	const imgAttribute = await imgElement?.getAttribute('onload');
-	expect(imgAttribute).toBe('console.log(\'danger\')');
+	// The img should have an `onerror` attribute.
+	const imgAttribute = await imgElement?.getAttribute('onerror');
+	expect(imgAttribute).toBeDefined();
+	expect(imgAttribute?.length).toBeGreaterThan(10);
+
+	// The img should have an `xss` class.
+	const imgClass = await imgElement?.getAttribute('class');
+	expect(imgClass).toBe('xss');
 
 	// There should be exactly one div element.
 	const div = page.locator('div');
@@ -51,9 +58,14 @@ test('Sanitization Off', async ({ page }) => {
 	// The div should have an `onclick` attribute.
 	const divAttribute = await divElement?.getAttribute('onclick');
 	expect(divAttribute).toBe('console.log(\'foo\')');
+
+	// An 'xss' console message should be present.
+	expect(consoleMessages.includes('xss')).toBe(true);
 });
 
 test('Sanitize Imports Only', async ({ page }) => {
+	const consoleMessages = new Array<string>();
+	page.on('console', message => consoleMessages.push(message.text()));
 	await page.goto('http://localhost:5173/');
 	const body = await page.evaluate(async (css) => { document.body = await cssToHtml(css, { imports: 'include', sanitize: 'imports' }); return document.body.outerHTML; }, css);
 
@@ -73,9 +85,13 @@ test('Sanitize Imports Only', async ({ page }) => {
 	const imgElement = await img.elementHandle();
 	expect(imgElement).toBeTruthy();
 
-	// The img should not have an `onload` attribute.
-	const imgAttribute = await imgElement?.getAttribute('onload');
+	// The img should not have an `onerror` attribute.
+	const imgAttribute = await imgElement?.getAttribute('onerror');
 	expect(imgAttribute).toBeNull();
+
+	// The img should not have an `xss` class.
+	const imgClass = await imgElement?.getAttribute('class');
+	expect(imgClass).toBeNull();
 
 	// There should be exactly one div element.
 	const div = page.locator('div');
@@ -90,6 +106,9 @@ test('Sanitize Imports Only', async ({ page }) => {
 	// The div should have an `onclick` attribute.
 	const divAttribute = await divElement?.getAttribute('onclick');
 	expect(divAttribute).toBe('console.log(\'foo\')');
+
+	// An 'xss' console message should not be present.
+	expect(consoleMessages.includes('xss')).toBe(false);
 });
 
 async function expectEverythingToBeSanitized (page: Page): Promise<void> {
@@ -109,9 +128,13 @@ async function expectEverythingToBeSanitized (page: Page): Promise<void> {
 	const imgElement = await img.elementHandle();
 	expect(imgElement).toBeTruthy();
 
-	// The img should not have an `onload` attribute.
-	const imgAttribute = await imgElement?.getAttribute('onload');
+	// The img should not have an `onerror` attribute.
+	const imgAttribute = await imgElement?.getAttribute('onerror');
 	expect(imgAttribute).toBeNull();
+
+	// The img should not have an `xss` class.
+	const imgClass = await imgElement?.getAttribute('class');
+	expect(imgClass).toBeNull();
 
 	// There should be exactly one div element.
 	const div = page.locator('div');
@@ -129,15 +152,25 @@ async function expectEverythingToBeSanitized (page: Page): Promise<void> {
 }
 
 test('Sanitize Everything', async ({ page }) => {
+	const consoleMessages = new Array<string>();
+	page.on('console', message => consoleMessages.push(message.text()));
 	await page.goto('http://localhost:5173/');
 	const body = await page.evaluate(async (css) => { document.body = await cssToHtml(css, { imports: 'include', sanitize: 'all' }); return document.body.outerHTML; }, css);
 
 	await expectEverythingToBeSanitized(page);
+
+	// An 'xss' console message should not be present.
+	expect(consoleMessages.includes('xss')).toBe(false);
 });
 
 test('Sanitize Everything By Default', async ({ page }) => {
+	const consoleMessages = new Array<string>();
+	page.on('console', message => consoleMessages.push(message.text()));
 	await page.goto('http://localhost:5173/');
 	const body = await page.evaluate(async (css) => { document.body = await cssToHtml(css, { imports: 'include' }); return document.body.outerHTML; }, css);
 
 	await expectEverythingToBeSanitized(page);
+
+	// An 'xss' console message should not be present.
+	expect(consoleMessages.includes('xss')).toBe(false);
 });
