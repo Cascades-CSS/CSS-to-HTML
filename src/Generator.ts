@@ -1,15 +1,8 @@
 import { createParser } from 'css-selector-parser';
 import type { AstRule, AstSelector } from 'css-selector-parser';
+import { Options } from './Config.js';
 import { Descriptor } from './Descriptor.js';
 import { createCSSOM, elementsAreComparable, mergeElements, sanitizeElement } from './Utility.js';
-
-export class Options {
-	duplicates?: 'preserve' | 'remove';
-	fill?: 'fill' | 'no-fill';
-	imports?: 'include' | 'style-only';
-	mergeNth?: 'merge' | 'no-merge';
-	sanitize?: 'all' | 'imports' | 'off';
-}
 
 const parse = createParser({ syntax: 'progressive' });
 
@@ -31,7 +24,8 @@ class Rule {
  * @param options `(Optional)` Options with which to configure the generator.
  * @returns An HTML body element containing the generated DOM.
  */
-export async function cssToHtml (css: CSSRuleList | string, options: Options = {}): Promise<HTMLBodyElement> {
+export async function cssToHtml (css: CSSRuleList | string, options: Partial<Options> = {}): Promise<HTMLBodyElement> {
+	options = new Options(options);
 	const output = document.createElement('body');
 
 	const fillerElements = new Array<HTMLElement>();
