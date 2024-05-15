@@ -106,7 +106,8 @@ export class Descriptor {
 		// Set the attributes.
 		if (rule.attributes) {
 			for (const attribute of rule.attributes) {
-				if (this.sanitize !== 'off' && immediatelySanitizedAttributes.includes(attribute.name)) continue;
+				if ((this.sanitize === 'all' || (this.sanitize === 'imports' && this.isImported))
+					&& immediatelySanitizedAttributes.includes(attribute.name)) continue;
 				let value = '';
 				if (attribute.value?.type === 'String') {
 					value = attribute.value.value;
