@@ -7,13 +7,13 @@ import { createCSSOM, elementsAreComparable, mergeElements, sanitizeElement } fr
 const parse = createParser({ syntax: 'progressive' });
 
 class Rule {
+	isImported: boolean;
 	rule: CSSStyleRule;
-	sanitize: boolean;
 	selectorAst: AstSelector;
 
-	constructor (rule: CSSStyleRule, sanitize = false) {
+	constructor (rule: CSSStyleRule, isImported = false) {
+		this.isImported = isImported;
 		this.rule = rule;
-		this.sanitize = sanitize;
 		this.selectorAst = parse(rule.selectorText);
 	}
 }
@@ -44,12 +44,12 @@ export async function cssToHtml (css: CSSRuleList | string, options: Partial<Opt
 	const rules = new Array<Rule>();
 	const importSet = new Set<string>();
 	
-	async function parseRules (source: CSSRuleList, urlBase: string, sanitize?: boolean): Promise<void> {
+	async function parseRules (source: CSSRuleList, urlBase: string, isImported = false): Promise<void> {
 		let seenStyleRule = false;
 		for (const rule of Object.values(source!)) {
 			if (rule instanceof CSSStyleRule) {
 				seenStyleRule = true;
-				rules.push(new Rule(rule, sanitize));
+				rules.push(new Rule(rule, isImported));
 			}
 			// Fetch the content of imported stylesheets.
 			else if (rule instanceof CSSImportRule && !seenStyleRule && options.imports === 'include') {
@@ -60,7 +60,7 @@ export async function cssToHtml (css: CSSRuleList | string, options: Partial<Opt
 					if (resource.status !== 200) throw new Error(`Response status for stylesheet "${url.href}" was ${resource.status}.`);
 					const text = await resource.text();
 					const importedRule = createCSSOM(text);
-					if (importedRule) await parseRules(importedRule, url.href, options.sanitize === 'imports');
+					if (importedRule) await parseRules(importedRule, url.href, true);
 				}
 			}
 		}
@@ -68,7 +68,7 @@ export async function cssToHtml (css: CSSRuleList | string, options: Partial<Opt
 	await parseRules(styleRules, window.location.href);
 
 	// Populate the DOM.
-	for (const { rule, sanitize, selectorAst } of rules) {
+	for (const { isImported, rule, selectorAst } of rules) {
 		// Traverse each rule nest of the selector AST.
 		for (const r of selectorAst.rules) {
 			const nest = new Array<Descriptor>();
@@ -76,7 +76,7 @@ export async function cssToHtml (css: CSSRuleList | string, options: Partial<Opt
 			// Create a descriptor for each of the nested selectors.
 			let next: AstRule | undefined = r;
 			do {
-				const descriptor = new Descriptor(next, undefined, sanitize);
+				const descriptor = new Descriptor(next, undefined, isImported, options.sanitize);
 				if (descriptor.invalid) {
 					invalidNest = true;
 					next = undefined;

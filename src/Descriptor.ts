@@ -1,5 +1,19 @@
 import type { AstRule } from 'css-selector-parser';
+import type { SanitizationOption } from './Config.js';
 import { replaceTextNode, sanitizeElement } from './Utility.js';
+
+/**
+ * Attributes that should be immediately sanitized before they are added to any elements.
+ */
+const immediatelySanitizedAttributes = [
+	'onerror',
+	'onload',
+	'onloadeddata',
+	'onloadedmetadata',
+	'onloadstart',
+	'onstalled',
+	'onsuspend',
+];
 
 /**
  * Valid positioning pseudo classes.
@@ -54,10 +68,12 @@ export class Descriptor {
 		type: 'child' as 'child' | 'type'
 	};
 	public invalid = false;
+	public isImported = false;
 	private rawContent = '';
-	private sanitize = false;
+	private sanitize: SanitizationOption;
 
-	constructor (rule: AstRule, content?: string, sanitize = false) {
+	constructor (rule: AstRule, content?: string, isImported = false, sanitize: SanitizationOption = 'all') {
+		this.isImported = isImported;
 		this.rule = rule;
 		this.sanitize = sanitize;
 
@@ -90,6 +106,7 @@ export class Descriptor {
 		// Set the attributes.
 		if (rule.attributes) {
 			for (const attribute of rule.attributes) {
+				if (this.sanitize !== 'off' && immediatelySanitizedAttributes.includes(attribute.name)) continue;
 				let value = '';
 				if (attribute.value?.type === 'String') {
 					value = attribute.value.value;
@@ -99,7 +116,7 @@ export class Descriptor {
 		}
 
 		// Sanitize the element.
-		if (this.sanitize) {
+		if (this.isImported && this.sanitize === 'imports') {
 			this.element = sanitizeElement(this.element);
 		}
 
@@ -179,7 +196,7 @@ export class Descriptor {
 		}
 
 		// Sanitize the element.
-		if (this.sanitize) {
+		if (this.isImported && this.sanitize === 'imports') {
 			this.element = sanitizeElement(this.element);
 		}
 	}
