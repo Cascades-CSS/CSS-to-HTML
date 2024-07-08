@@ -35,7 +35,7 @@
 		"@types/dompurify": "^3.0.5"
 	},
 	"dependencies": {
-		"css-selector-parser": "^2.3.2",
+		"css-selector-parser": "^3.0.5",
 		"dompurify": "^3.1.4"
 	}
 }
