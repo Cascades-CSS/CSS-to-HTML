@@ -1,7 +1,7 @@
 import DOMPurify from 'dompurify';
 
 /**
- * Create a CSS Object Model from a string of CSS.
+ * Create a CSS Object Model from a CSS string.
  * @param css The CSS string.
  * @returns The CSSOM.
  */
@@ -30,10 +30,9 @@ export function elementsAreComparable (a: HTMLElement | Element, b: HTMLElement 
     ) {
         return false;
     }
-    // Compare type attributes.
     // Compare class lists.
     let differingClasses = 0;
-    a.classList.forEach((c) => {
+    a.classList.forEach(c => {
         if (!b.classList.contains(c)) {
             differingClasses++;
         }
@@ -61,8 +60,8 @@ export function mergeElements <T extends HTMLElement | Element> (source: HTMLEle
 	}
 	if (source.classList.length > 0 || destination.classList.length > 0) {
 		const mergedClasses = new Set<string>();
-		source.classList.forEach((c) => mergedClasses.add(c));
-		destination.classList.forEach((c) => mergedClasses.add(c));
+		source.classList.forEach(c => mergedClasses.add(c));
+		destination.classList.forEach(c => mergedClasses.add(c));
 		destination.className = Array.from(mergedClasses).join(' ');
 	}
 	return destination;
@@ -75,7 +74,7 @@ export function mergeElements <T extends HTMLElement | Element> (source: HTMLEle
  */
 export function replaceTextNode (element: HTMLElement | Element, value: string): void {
     const nodes = Array.from(element.childNodes);
-    const textNode = nodes.find((node) => node.nodeType === Node.TEXT_NODE);
+    const textNode = nodes.find(node => node.nodeType === Node.TEXT_NODE);
     if (textNode) {
         textNode.textContent = value;
     } else {
