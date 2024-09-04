@@ -43,13 +43,23 @@ export async function cssToHtml (css: CSSRuleList | string, options: Partial<Opt
 	// Parse the CSSOM into individual rules.
 	const rules = new Array<Rule>();
 	const imports = new Set<string>();
-	
+
+	function parseNestedRules (parent: CSSStyleRule, isImported = false): void {
+		for (const rule of Object.values(parent.cssRules)) {
+			if (!(rule instanceof CSSStyleRule)) continue;
+			rule.selectorText = rule.selectorText.replace(/&+/, parent.selectorText);
+			rules.push(new Rule(rule, isImported));
+			parseNestedRules(rule, isImported)
+		}
+	}
+
 	async function parseRules (source: CSSRuleList, urlBase: string, isImported = false): Promise<void> {
 		let seenStyleRule = false;
 		for (const rule of Object.values(source)) {
 			if (rule instanceof CSSStyleRule) {
 				seenStyleRule = true;
 				rules.push(new Rule(rule, isImported));
+				parseNestedRules(rule, isImported);
 			}
 			// Fetch the content of imported stylesheets.
 			else if (!seenStyleRule && rule instanceof CSSImportRule && options.imports === 'include') {
