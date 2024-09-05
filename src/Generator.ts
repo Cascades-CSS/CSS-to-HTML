@@ -9,12 +9,17 @@ const parse = createParser({ syntax: 'progressive' });
 class Rule {
 	isImported: boolean;
 	rule: CSSStyleRule;
+	selector: string;
 	selectorAst: AstSelector;
 
-	constructor (rule: CSSStyleRule, isImported = false) {
+	constructor (rule: CSSStyleRule, isImported = false, parentSelector = '') {
 		this.isImported = isImported;
 		this.rule = rule;
-		this.selectorAst = parse(rule.selectorText);
+		this.selector = rule.selectorText;
+		if (parentSelector) {
+			this.selector = this.selector.replace(/&+/, parentSelector);
+		}
+		this.selectorAst = parse(this.selector);
 	}
 }
 
@@ -44,12 +49,12 @@ export async function cssToHtml (css: CSSRuleList | string, options: Partial<Opt
 	const rules = new Array<Rule>();
 	const imports = new Set<string>();
 
-	function parseNestedRules (parent: CSSStyleRule, isImported = false): void {
+	function parseNestedRules (parent: CSSStyleRule, parentSelector: string, isImported = false): void {
 		for (const rule of Object.values(parent.cssRules)) {
 			if (!(rule instanceof CSSStyleRule)) continue;
-			rule.selectorText = rule.selectorText.replace(/&+/, parent.selectorText);
-			rules.push(new Rule(rule, isImported));
-			parseNestedRules(rule, isImported)
+			const newRule = new Rule(rule, isImported, parentSelector);
+			rules.push(newRule);
+			parseNestedRules(rule, newRule.selector, isImported)
 		}
 	}
 
@@ -59,7 +64,7 @@ export async function cssToHtml (css: CSSRuleList | string, options: Partial<Opt
 			if (rule instanceof CSSStyleRule) {
 				seenStyleRule = true;
 				rules.push(new Rule(rule, isImported));
-				parseNestedRules(rule, isImported);
+				parseNestedRules(rule, rule.selectorText, isImported);
 			}
 			// Fetch the content of imported stylesheets.
 			else if (!seenStyleRule && rule instanceof CSSImportRule && options.imports === 'include') {
