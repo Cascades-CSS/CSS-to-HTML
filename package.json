@@ -31,7 +31,7 @@
 	},
 	"homepage": "https://github.com/CSS-Canvas/CSS-to-HTML#readme",
 	"devDependencies": {
-		"@playwright/test": "^1.35.1",
+		"@playwright/test": "^1.47.0",
 		"@types/dompurify": "^3.0.5",
 		"typescript": "^5.5.4",
 		"vite": "^5.4.3"
