@@ -4,7 +4,7 @@
 
 Generate HTML documents from just CSS.
 
-Give it a try on [Cascades](https://tiny.cascades.app/) ✨
+Give it a try on [Cascades](https://demo.cascades.app/) ✨
 
 
 ## Usage
@@ -13,7 +13,7 @@ Give it a try on [Cascades](https://tiny.cascades.app/) ✨
 npm i css-to-html
 ```
 
-```javascript
+```js
 import { cssToHtml } from 'css-to-html';
 
 // From a CSS string:
@@ -62,12 +62,12 @@ Output:
 ```
 
 > [!NOTE]
-> `cssToHtml` always returns an [`HTMLBodyElement`](https://developer.mozilla.org/en-US/docs/Web/API/HTMLBodyElement). To get the string representation of the generated HTML, use [`innerHtml`](https://developer.mozilla.org/en-US/docs/Web/API/Element/innerHTML) or [`outerHtml`](https://developer.mozilla.org/en-US/docs/Web/API/Element/outerHTML). For example:
+> `cssToHtml` always returns an [`HTMLBodyElement`](https://developer.mozilla.org/en-US/docs/Web/API/HTMLBodyElement). To get the string representation of the generated HTML, use [`innerHTML`](https://developer.mozilla.org/en-US/docs/Web/API/Element/innerHTML) or [`outerHTML`](https://developer.mozilla.org/en-US/docs/Web/API/Element/outerHTML). For example:
 >
-> ```javascript
+> ```js
 > const html = await cssToHtml('h1#greeting { content: "Hello!"; }');
-> console.log( html.innerHtml ); // '<h1 id="greeting">Hello!</h1>'
-> console.log( html.outerHtml ); // '<body><h1 id="greeting">Hello!</h1></body>'
+> console.log( html.innerHTML ); // '<h1 id="greeting">Hello!</h1>'
+> console.log( html.outerHTML ); // '<body><h1 id="greeting">Hello!</h1></body>'
 > ```
 
 
@@ -88,3 +88,23 @@ An options object can be passed as the second argument to `cssToHtml()` to custo
 | `sanitize`   | `all`        * | Sanitize the generated HTML using [DOMPurify](https://github.com/cure53/DOMPurify). |
 |              | `imports`      | Only sanitize the HTML generated from imported stylesheets. |
 |              | `off`          | Don't sanitize the generated HTML. |
+
+<details>
+<summary>Example</summary>
+
+```js
+import { cssToHtml, type Options } from 'css-to-html';
+
+// An example options object (populated with default values).
+const options: Options = {
+    duplicates: 'remove',
+    fill: 'fill',
+    imports: 'style-only',
+    mergeNth: 'merge',
+    sanitize: 'all'
+};
+
+const css = 'p { color: purple; }';
+const html = await cssToHtml(css, options);
+```
+</details>
