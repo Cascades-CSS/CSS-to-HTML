@@ -9,12 +9,17 @@ const parse = createParser({ syntax: 'progressive' });
 class Rule {
 	isImported: boolean;
 	rule: CSSStyleRule;
+	selector: string;
 	selectorAst: AstSelector;
 
-	constructor (rule: CSSStyleRule, isImported = false) {
+	constructor (rule: CSSStyleRule, isImported = false, parentSelector = '') {
 		this.isImported = isImported;
 		this.rule = rule;
-		this.selectorAst = parse(rule.selectorText);
+		this.selector = rule.selectorText;
+		if (parentSelector) {
+			this.selector = this.selector.replace(/&+/, parentSelector);
+		}
+		this.selectorAst = parse(this.selector);
 	}
 }
 
@@ -43,13 +48,23 @@ export async function cssToHtml (css: CSSRuleList | string, options: Partial<Opt
 	// Parse the CSSOM into individual rules.
 	const rules = new Array<Rule>();
 	const imports = new Set<string>();
-	
+
+	function parseNestedRules (parent: CSSStyleRule, parentSelector: string, isImported = false): void {
+		for (const rule of Object.values(parent.cssRules)) {
+			if (!(rule instanceof CSSStyleRule)) continue;
+			const newRule = new Rule(rule, isImported, parentSelector);
+			rules.push(newRule);
+			parseNestedRules(rule, newRule.selector, isImported)
+		}
+	}
+
 	async function parseRules (source: CSSRuleList, urlBase: string, isImported = false): Promise<void> {
 		let seenStyleRule = false;
 		for (const rule of Object.values(source)) {
 			if (rule instanceof CSSStyleRule) {
 				seenStyleRule = true;
 				rules.push(new Rule(rule, isImported));
+				parseNestedRules(rule, rule.selectorText, isImported);
 			}
 			// Fetch the content of imported stylesheets.
 			else if (!seenStyleRule && rule instanceof CSSImportRule && options.imports === 'include') {

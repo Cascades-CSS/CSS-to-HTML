@@ -17,6 +17,7 @@ jobs:
           comma,
           ignored,
           import,
+          nested,
           nth-child,
           sanitize,
           selector
