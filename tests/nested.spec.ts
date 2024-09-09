@@ -75,7 +75,7 @@ main {
 }
 `;
 
-const html = `<body><nav><a href="" class="icon" id="logo"><img src="https://example.com/image2"></a><input placeholder="Search" readonly="" type="text" class="search"></nav><main>A<section>B<div class="foo">C</div></section></main></body>`;
+const html = `<body><nav><a href="" class="icon" id="logo"><img src="https://example.com/image2"></a><input placeholder="Search" readonly="" type="text" class="search"></nav><main><section><div class="foo">C</div></section></main></body>`;
 
 test('Nested', async ({ page }) => {
 	await page.goto('http://localhost:5173/');
