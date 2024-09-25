@@ -25,6 +25,9 @@ const css = document.querySelector('style').sheet.cssRules;
 const html = await cssToHtml(css);
 ```
 
+> [!NOTE]
+> CSS-to-HTML relies on some browser-only JS features, so it doesn't work in Node (yet).  
+> If you want to use this in a Node project, please use a webdriver like [Puppeteer](https://pptr.dev/).
 
 ## Example
 
