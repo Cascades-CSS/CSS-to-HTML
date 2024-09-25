@@ -33,8 +33,7 @@
 	"devDependencies": {
 		"@playwright/test": "^1.47.0",
 		"@types/dompurify": "^3.0.5",
-		"typescript": "^5.6.2",
-		"vite": "^5.4.8"
+		"typescript": "^5.6.2"
 	},
 	"dependencies": {
 		"css-selector-parser": "^2.3.2",
