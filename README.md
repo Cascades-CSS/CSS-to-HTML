@@ -9,6 +9,12 @@ Give it a try on [Cascades](https://demo.cascades.app/) ✨
 
 ## Usage
 
+> [!NOTE]
+> CSS-to-HTML relies on some browser-only JS features, so it doesn't work in Node (yet).  
+> If you want to use this in a Node project, please use a webdriver like [Puppeteer](https://pptr.dev/).
+
+### With a Bundler
+
 ```sh
 npm i css-to-html
 ```
@@ -25,9 +31,22 @@ const css = document.querySelector('style').sheet.cssRules;
 const html = await cssToHtml(css);
 ```
 
-> [!NOTE]
-> CSS-to-HTML relies on some browser-only JS features, so it doesn't work in Node (yet).  
-> If you want to use this in a Node project, please use a webdriver like [Puppeteer](https://pptr.dev/).
+### Or as a Static Script
+
+Download the latest script from the [releases page](https://github.com/Cascades-CSS/CSS-to-HTML/releases). Then include the script in your site:
+
+```html
+<script src="path/to/css-to-html.js"></script>
+
+<script>
+const css = 'p { color: purple; }';
+
+cssToHtml(css).then(html => {
+    console.log(html);
+});
+</script>
+```
+
 
 ## Example
 
