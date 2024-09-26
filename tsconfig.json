@@ -1,5 +1,6 @@
 {
 	"include": ["src"],
+	"exclude": ["src/index.static.ts"],
 	"compilerOptions": {
 		"target": "ESNext",
 		"module": "ESNext",

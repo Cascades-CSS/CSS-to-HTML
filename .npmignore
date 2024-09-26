@@ -2,6 +2,7 @@
 assets
 node_modules
 src
+static
 tests
 /test-results/
 /test-server/
