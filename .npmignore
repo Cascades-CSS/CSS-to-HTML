@@ -11,3 +11,4 @@ tests
 .gitignore
 playwright.config.ts
 tsconfig.json
+vite.config.js
