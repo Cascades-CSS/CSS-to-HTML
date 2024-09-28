@@ -30,16 +30,25 @@ div:hover {
 `;
 
 test('Ignored', async ({ page }) => {
+	const conditions = async () => {
+		const body = await page.evaluate(async css => { document.body = await cssToHtml(css); return document.body.outerHTML; }, css);
+
+		// The body should have exactly one child.
+		const bodyDirectChildren = page.locator('body *');
+		expect(await bodyDirectChildren.count()).toBe(1);
+		const element = await bodyDirectChildren.elementHandle();
+		expect(element).toBeTruthy();
+
+		// That element should have specific text content.
+		const content = await element?.innerHTML();
+		expect(content).toBe('C');
+	};
+
+	// Bundle.
 	await page.goto('http://localhost:5173/');
-	const body = await page.evaluate(async (css) => { document.body = await cssToHtml(css); return document.body.outerHTML; }, css);
+	await conditions();
 
-	// The body should have exactly one child.
-	const bodyDirectChildren = page.locator('body *');
-	expect(await bodyDirectChildren.count()).toBe(1);
-	const element = await bodyDirectChildren.elementHandle();
-	expect(element).toBeTruthy();
-
-	// That element should have specific text content.
-	const content = await element?.innerHTML();
-	expect(content).toBe('C');
+	// Static.
+	await page.goto('http://localhost:5173/static');
+	await conditions();
 });
