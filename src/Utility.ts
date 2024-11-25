@@ -88,9 +88,7 @@ export function replaceTextNode (element: HTMLElement | Element, value: string):
  * @returns A sanitized copy of the given element.
  */
 export function sanitizeElement (element: HTMLElement): HTMLElement {
-    const sanitizedElement = DOMPurify.sanitize(element, { RETURN_DOM: true });
-    if (sanitizedElement instanceof HTMLBodyElement && !(element instanceof HTMLBodyElement)) {
-        return sanitizedElement.firstElementChild as HTMLElement;
-    }
+    const sanitizedElement = element.cloneNode(true) as HTMLElement;
+    DOMPurify.sanitize(sanitizedElement, { IN_PLACE: true });
     return sanitizedElement;
 }
