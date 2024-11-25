@@ -31,10 +31,10 @@
 	},
 	"homepage": "https://github.com/CSS-Canvas/CSS-to-HTML#readme",
 	"devDependencies": {
-		"@playwright/test": "^1.48.0",
-		"@types/node": "^22.7.5",
-		"typescript": "^5.6.3",
-		"vite": "^5.4.9"
+		"@playwright/test": "^1.49.0",
+		"@types/node": "^22.9.4",
+		"typescript": "^5.7.2",
+		"vite": "^5.4.11"
 	},
 	"dependencies": {
 		"css-selector-parser": "^2.3.2",
