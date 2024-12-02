@@ -34,7 +34,7 @@
 		"@playwright/test": "^1.49.0",
 		"@types/node": "^22.9.4",
 		"typescript": "^5.7.2",
-		"vite": "^5.4.11"
+		"vite": "^6.0.2"
 	},
 	"dependencies": {
 		"css-selector-parser": "^2.3.2",
