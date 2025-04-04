@@ -38,7 +38,7 @@
 		"vite": "^6.2.5"
 	},
 	"dependencies": {
-		"css-selector-parser": "^2.3.2",
+		"css-selector-parser": "^3.1.1",
 		"dompurify": "^3.2.5"
 	}
 }
