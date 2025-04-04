@@ -18,7 +18,8 @@
 		"css",
 		"html",
 		"generator",
-		"converter"
+		"converter",
+		"css-to-html"
 	],
 	"author": {
 		"name": "Giga",
