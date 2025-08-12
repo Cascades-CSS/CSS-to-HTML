@@ -33,7 +33,7 @@
 	"homepage": "https://github.com/CSS-Canvas/CSS-to-HTML#readme",
 	"devDependencies": {
 		"@playwright/test": "^1.51.1",
-		"@types/node": "^22.14.0",
+		"@types/node": "^24.2.1",
 		"typescript": "^5.8.2",
 		"vite": "^6.2.5"
 	},
