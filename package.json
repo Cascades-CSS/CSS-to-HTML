@@ -1,6 +1,6 @@
 {
 	"name": "css-to-html",
-	"version": "0.8.3",
+	"version": "0.8.4",
 	"description": "Generate HTML documents from just CSS.",
 	"main": "dist/index.js",
 	"types": "dist/index.d.ts",
