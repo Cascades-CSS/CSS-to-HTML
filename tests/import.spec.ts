@@ -30,6 +30,8 @@ test('Import', async ({ page }) => {
 		await expect(span).toHaveCount(1);
 		await expect(innerHTML(span)).resolves.toBe('A');
 
+		// The div with class `.last` should have specific text content.
+		await expect(innerHTML(last)).resolves.toBe('D');
 	};
 
 	// Bundle.
