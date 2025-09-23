@@ -32,13 +32,13 @@
 	},
 	"homepage": "https://github.com/CSS-Canvas/CSS-to-HTML#readme",
 	"devDependencies": {
-		"@playwright/test": "^1.51.1",
+		"@playwright/test": "^1.55.0",
 		"@types/node": "^22.14.0",
-		"typescript": "^5.8.2",
-		"vite": "^6.2.5"
+		"typescript": "^5.9.2",
+		"vite": "^7.1.7"
 	},
 	"dependencies": {
 		"css-selector-parser": "^2.3.2",
-		"dompurify": "^3.2.5"
+		"dompurify": "^3.2.7"
 	}
 }
