@@ -3,7 +3,7 @@
  */
 
 import { test, expect } from '@playwright/test';
-import { cssToHtml } from '../src/index';
+import { evaluate, innerHTML } from './utilities';
 
 const css = `
 span:nth-child(5) {
@@ -28,7 +28,7 @@ span.second-to-last:nth-last-child(2) {
 
 test('Nth-Child', async ({ page }) => {
 	const conditions = async () => {
-		const body = await page.evaluate(async css => { document.body = await cssToHtml(css); return document.body.outerHTML; }, css);
+		await evaluate(page, css);
 
 		// The body should have exactly eight direct children.
 		const bodyDirectChildren = page.locator('body > *');
@@ -40,29 +40,21 @@ test('Nth-Child', async ({ page }) => {
 
 		// The first element should have specific text content.
 		const first = page.locator('div.first:first-child');
-		const firstElement = await first.elementHandle();
-		const firstContent = await firstElement?.innerHTML();
-		expect(firstContent).toBe('B');
 		await expect(first).toHaveCount(1);
+		await expect(innerHTML(first)).resolves.toBe('B');
 
 		// The fifth element should have specific text content.
 		const fifth = page.locator('span.last:nth-child(5)');
-		const fifthElement = await fifth.elementHandle();
-		const fifthContent = await fifthElement?.innerHTML();
-		expect(fifthContent).toBe('C');
 		await expect(fifth).toHaveCount(1);
+		await expect(innerHTML(fifth)).resolves.toBe('C');
 
 		// The seventh element should have specific text content.
 		const seventh = page.locator('span.second-to-last:nth-child(7)');
-		const seventhElement = await seventh.elementHandle();
-		const seventhContent = await seventhElement?.innerHTML();
-		expect(seventhContent).toBe('F');
 		await expect(seventh).toHaveCount(1);
+		await expect(innerHTML(seventh)).resolves.toBe('F');
 
 		// The last element should have specific text content.
-		const lastElement = await last.elementHandle();
-		const lastContent = await lastElement?.innerHTML();
-		expect(lastContent).toBe('E');
+		await expect(innerHTML(last)).resolves.toBe('E');
 	};
 
 	// Bundle.

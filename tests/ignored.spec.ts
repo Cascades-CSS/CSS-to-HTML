@@ -3,7 +3,7 @@
  */
 
 import { test, expect } from '@playwright/test';
-import { cssToHtml } from '../src/index';
+import { evaluate, innerHTML } from './utilities';
 
 const css = `
 :root {
@@ -31,16 +31,14 @@ div:hover {
 
 test('Ignored', async ({ page }) => {
 	const conditions = async () => {
-		const body = await page.evaluate(async css => { document.body = await cssToHtml(css); return document.body.outerHTML; }, css);
+		await evaluate(page, css);
 
 		// The body should have exactly one child.
 		const bodyDirectChildren = page.locator('body *');
 		await expect(bodyDirectChildren).toHaveCount(1);
 
 		// That element should have specific text content.
-		const element = await bodyDirectChildren.elementHandle();
-		const content = await element?.innerHTML();
-		expect(content).toBe('C');
+		await expect(innerHTML(bodyDirectChildren)).resolves.toBe('C');
 	};
 
 	// Bundle.

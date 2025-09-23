@@ -3,7 +3,7 @@
  */
 
 import { test, expect } from '@playwright/test';
-import { cssToHtml } from '../src/index';
+import { evaluate, innerHTML } from './utilities';
 
 const css = `
 a {
@@ -23,35 +23,29 @@ a {
 
 test('Cascading', async ({ page }) => {
 	const conditions = async () => {
-		const body = await page.evaluate(async css => { document.body = await cssToHtml(css); return document.body.outerHTML; }, css);
+		await evaluate(page, css);
 
 		// The body should have exactly two direct children.
 		const bodyDirectChildren = page.locator('body > *');
 		await expect(bodyDirectChildren).toHaveCount(2);
 
 		// There should be exactly one anchor element,
-		// and its href attribute should be populated.
+		// its href attribute should be populated,
+		// and it should not have any text content.
 		const anchor = page.locator('a');
 		await expect(anchor).toHaveCount(1);
 		await expect(anchor).toHaveAttribute('href', 'https://example.com/page');
-
-		// The anchor should not have any text content.
-		const anchorElement = await anchor.elementHandle();
-		const anchorContent = await anchorElement?.innerHTML();
-		expect(anchorContent).toBe('');
+		await expect(innerHTML(anchor)).resolves.toBe('');
 
 		// The element with class `.more` should follow the anchor.
 		const more = page.locator('a + .more');
 		await expect(more).toHaveCount(1);
 
-		// There should be exactly one span element.
+		// There should be exactly one span element,
+		// and it should have specific text content.
 		const span = page.locator('span');
 		await expect(span).toHaveCount(1);
-
-		// The span should have specific text content.
-		const spanElement = await span.elementHandle();
-		const spanContent = await spanElement?.innerHTML();
-		expect(spanContent).toBe('B');
+		await expect(innerHTML(span)).resolves.toBe('B');
 	};
 
 	// Bundle.

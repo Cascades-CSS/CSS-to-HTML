@@ -3,7 +3,7 @@
  */
 
 import { test, expect } from '@playwright/test';
-import { cssToHtml } from '../src/index';
+import { evaluate } from './utilities';
 
 const css = `
 nav > a#logo.icon img {
@@ -79,8 +79,8 @@ const html = `<body><nav><a href="" class="icon" id="logo"><img src="https://exa
 
 test('Nested', async ({ page }) => {
 	const conditions = async () => {
-		const body = await page.evaluate(async css => { document.body = await cssToHtml(css); return document.body.outerHTML; }, css);
-		const nestedBody = await page.evaluate(async css => { document.body = await cssToHtml(css); return document.body.outerHTML; }, nestedCss);
+		const body = await evaluate(page, css);
+		const nestedBody = await evaluate(page, nestedCss);
 
 		expect(body).toBe(html);
 		expect(nestedBody).toBe(html);

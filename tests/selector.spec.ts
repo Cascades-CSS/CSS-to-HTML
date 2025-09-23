@@ -3,7 +3,7 @@
  */
 
 import { test, expect } from '@playwright/test';
-import { cssToHtml } from '../src/index';
+import { evaluate } from './utilities';
 
 const css = `
 #cat + .mouse  >span.flea+i {
@@ -26,7 +26,7 @@ const html = `<body><div id="cat"></div><div class="mouse"><span class="flea"></
 
 test('Selector', async ({ page }) => {
 	const conditions = async () => {
-		const body = await page.evaluate(async css => { document.body = await cssToHtml(css); return document.body.outerHTML; }, css);
+		const body = await evaluate(page, css);
 
 		expect(body).toBe(html);
 	};

@@ -3,7 +3,7 @@
  */
 
 import { test, expect } from '@playwright/test';
-import { cssToHtml } from '../src/index';
+import { evaluate, innerHTML } from './utilities';
 
 const css = `
 @import url('http://localhost:5173/import1.css');
@@ -14,7 +14,7 @@ div.last {
 
 test('Import', async ({ page }) => {
 	const conditions = async () => {
-		const body = await page.evaluate(async css => { document.body = await cssToHtml(css, { imports: 'include' }); return document.body.outerHTML; }, css);
+		await evaluate(page, css, { imports: 'include' });
 
 		// The body should have exactly four direct children.
 		const bodyDirectChildren = page.locator('body > *');
@@ -24,14 +24,12 @@ test('Import', async ({ page }) => {
 		const last = page.locator('.first:first-child + .second + .third + .last:last-child');
 		await expect(last).toHaveCount(1);
 
-		// There should be exactly one span element.
+		// There should be exactly one span element,
+		// and it should have specific text content.
 		const span = page.locator('span');
 		await expect(span).toHaveCount(1);
+		await expect(innerHTML(span)).resolves.toBe('A');
 
-		// The span should have specific text content.
-		const spanElement = await span.elementHandle();
-		const spanContent = await spanElement?.innerHTML();
-		expect(spanContent).toBe('A');
 	};
 
 	// Bundle.

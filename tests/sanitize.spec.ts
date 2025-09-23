@@ -5,7 +5,7 @@
 // TODO: Make these tests more comprehensive. They should cover a wider range of sanitization cases.
 
 import { test, expect, type Page } from '@playwright/test';
-import { cssToHtml } from '../src/index';
+import { evaluate, innerHTML } from './utilities';
 
 const css = `
 @import url('http://localhost:5173/import4.css');
@@ -19,7 +19,7 @@ test('Sanitization Off', async ({ page }) => {
 	page.on('console', message => consoleMessages.push(message.text()));
 
 	const conditions = async () => {
-		const body = await page.evaluate(async css => { document.body = await cssToHtml(css, { imports: 'include', sanitize: 'off' }); return document.body.outerHTML; }, css);
+		await evaluate(page, css, { imports: 'include', sanitize: 'off' });
 
 		// The body should have exactly two direct children.
 		const bodyDirectChildren = page.locator('body > *');
@@ -37,14 +37,11 @@ test('Sanitization Off', async ({ page }) => {
 		await expect(img).toHaveAttribute('onerror', /.{10}/);
 		await expect(img).toHaveClass('xss');
 
-		// There should be exactly one div element.
+		// There should be exactly one div element,
+		// and it should have specific text content.
 		const div = page.locator('div');
 		await expect(div).toHaveCount(1);
-
-		// The div should have specific text content.
-		const divElement = await div.elementHandle();
-		const divContent = await divElement?.innerHTML();
-		expect(divContent).toBe('A');
+		await expect(innerHTML(div)).resolves.toBe('A');
 
 		// The div should have an `onclick` attribute.
 		await expect(div).toHaveAttribute('onclick', 'console.log(\'foo\')');
@@ -67,7 +64,7 @@ test('Sanitize Imports Only', async ({ page }) => {
 	page.on('console', message => consoleMessages.push(message.text()));
 
 	const conditions = async () => {
-		const body = await page.evaluate(async css => { document.body = await cssToHtml(css, { imports: 'include', sanitize: 'imports' }); return document.body.outerHTML; }, css);
+		await evaluate(page, css, { imports: 'include', sanitize: 'imports' });
 
 		// The body should have exactly two direct children.
 		const bodyDirectChildren = page.locator('body > *');
@@ -85,14 +82,11 @@ test('Sanitize Imports Only', async ({ page }) => {
 		await expect(img).not.toHaveAttribute('onerror');
 		await expect(img).not.toHaveClass('xss');
 
-		// There should be exactly one div element.
+		// There should be exactly one div element,
+		// and it should have specific text content.
 		const div = page.locator('div');
 		await expect(div).toHaveCount(1);
-
-		// The div should have specific text content.
-		const divElement = await div.elementHandle();
-		const divContent = await divElement?.innerHTML();
-		expect(divContent).toBe('A');
+		await expect(innerHTML(div)).resolves.toBe('A');
 
 		// The div should have an `onclick` attribute.
 		await expect(div).toHaveAttribute('onclick', 'console.log(\'foo\')');
@@ -127,14 +121,11 @@ async function expectEverythingToBeSanitized (page: Page): Promise<void> {
 	await expect(img).not.toHaveAttribute('onerror');
 	await expect(img).not.toHaveClass('xss');
 
-	// There should be exactly one div element.
+	// There should be exactly one div element,
+	// and it should have specific text content.
 	const div = page.locator('div');
 	await expect(div).toHaveCount(1);
-
-	// The div should have specific text content.
-	const divElement = await div.elementHandle();
-	const divContent = await divElement?.innerHTML();
-	expect(divContent).toBe('A');
+	await expect(innerHTML(div)).resolves.toBe('A');
 
 	// The div should not have an `onclick` attribute.
 	await expect(div).not.toHaveAttribute('onclick');
@@ -145,7 +136,7 @@ test('Sanitize Everything', async ({ page }) => {
 	page.on('console', message => consoleMessages.push(message.text()));
 
 	const conditions = async () => {
-		const body = await page.evaluate(async css => { document.body = await cssToHtml(css, { imports: 'include', sanitize: 'all' }); return document.body.outerHTML; }, css);
+		await evaluate(page, css, { imports: 'include', sanitize: 'all' });
 	
 		await expectEverythingToBeSanitized(page);
 	
@@ -167,7 +158,7 @@ test('Sanitize Everything By Default', async ({ page }) => {
 	page.on('console', message => consoleMessages.push(message.text()));
 
 	const conditions = async () => {
-		const body = await page.evaluate(async css => { document.body = await cssToHtml(css, { imports: 'include' }); return document.body.outerHTML; }, css);
+		await evaluate(page, css, { imports: 'include' });
 
 		await expectEverythingToBeSanitized(page);
 
