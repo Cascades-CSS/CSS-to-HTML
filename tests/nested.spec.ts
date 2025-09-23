@@ -3,7 +3,7 @@
  */
 
 import { test, expect } from '@playwright/test';
-import { evaluate } from './utilities';
+import { evaluate, innerHTML } from './utilities';
 
 const css = `
 nav > a#logo.icon img {
@@ -75,22 +75,59 @@ main {
 }
 `;
 
-const html = `<body><nav><a href="" class="icon" id="logo"><img src="https://example.com/image2"></a><input placeholder="Search" readonly="" type="text" class="search"></nav><main><section><div class="foo">C</div></section></main></body>`;
-
 test('Nested', async ({ page }) => {
 	const conditions = async () => {
-		const body = await evaluate(page, css);
-		const nestedBody = await evaluate(page, nestedCss);
+		// The body should have exactly two direct children.
+		const bodyDirectChildren = page.locator('body > *');
+		await expect(bodyDirectChildren).toHaveCount(2);
 
-		expect(body).toBe(html);
-		expect(nestedBody).toBe(html);
+		// The body's direct children should be in a specific order.
+		const last = page.locator('body > nav + main:last-child');
+		await expect(last).toHaveCount(1);
+
+		// The anchor should have an empty link.
+		const anchor = page.locator('nav > a#logo.icon');
+		await expect(anchor).toHaveCount(1);
+		await expect(anchor).toHaveAttribute('href', '');
+
+		// The image should have a specific src.
+		const image = anchor.locator('> img');
+		await expect(image).toHaveCount(1);
+		await expect(image).toHaveAttribute('src', 'https://example.com/image2');
+
+		// The input should follow the anchor, and have specific attributes.
+		const input = anchor.locator('+ input.search');
+		await expect(input).toHaveCount(1);
+		await expect(input).toHaveAttribute('placeholder', 'Search');
+		await expect(input).toHaveAttribute('readonly', '');
+		await expect(input).toHaveAttribute('type', 'text');
+
+		// There should only be one div on the page.
+		const divs = page.locator('div');
+		await expect(divs).toHaveCount(1);
+
+		// The div with class `.foo` should have specific text content.
+		const div = page.locator('nav + main > section > div.foo');
+		await expect(div).toHaveCount(1);
+		await expect(innerHTML(div)).resolves.toBe('C');
+	};
+
+	const tests = async () => {
+		const body = await evaluate(page, css);
+		await conditions();
+
+		const nestedBody = await evaluate(page, nestedCss);
+		await conditions();
+
+		// The outer HTML produced by both inputs should match.
+		expect(body).toBe(nestedBody);
 	};
 
 	// Bundle.
 	await page.goto('http://localhost:5173/');
-	await conditions();
+	await tests();
 
 	// Static.
 	await page.goto('http://localhost:5173/static');
-	await conditions();
+	await tests();
 });

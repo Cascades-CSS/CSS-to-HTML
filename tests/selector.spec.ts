@@ -22,13 +22,38 @@ nav input[type="text"].search[readonly] {
 }
 `;
 
-const html = `<body><div id="cat"></div><div class="mouse"><span class="flea"></span><i></i></div><nav><a href="" class="icon" id="logo"><img src="https://example.com/image2"></a><input placeholder="Search" readonly="" type="text" class="search"></nav></body>`;
-
 test('Selector', async ({ page }) => {
 	const conditions = async () => {
-		const body = await evaluate(page, css);
+		await evaluate(page, css);
 
-		expect(body).toBe(html);
+		// The body should have exactly three direct children.
+		const bodyDirectChildren = page.locator('body > *');
+		await expect(bodyDirectChildren).toHaveCount(3);
+
+		// The body's direct children should be in a specific order.
+		const last = page.locator('body > div#cat + div.mouse + nav:last-child');
+		await expect(last).toHaveCount(1);
+
+		// The div with class `.mouse` should have exactly two children.
+		const mouse = page.locator('.mouse > span.flea:first-child + i:last-child');
+		await expect(mouse).toHaveCount(1);
+
+		// The anchor should have an empty link.
+		const anchor = page.locator('nav > a#logo.icon');
+		await expect(anchor).toHaveCount(1);
+		await expect(anchor).toHaveAttribute('href', '');
+
+		// The image should have a specific src.
+		const image = anchor.locator('> img');
+		await expect(image).toHaveCount(1);
+		await expect(image).toHaveAttribute('src', 'https://example.com/image2');
+
+		// The input should follow the anchor, and have specific attributes.
+		const input = anchor.locator('+ input.search');
+		await expect(input).toHaveCount(1);
+		await expect(input).toHaveAttribute('placeholder', 'Search');
+		await expect(input).toHaveAttribute('readonly', '');
+		await expect(input).toHaveAttribute('type', 'text');
 	};
 
 	// Bundle.

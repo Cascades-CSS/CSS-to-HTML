@@ -15,10 +15,10 @@ div.last[onclick="console.log('foo')"] {
 `;
 
 test('Sanitization Off', async ({ page }) => {
-	const consoleMessages = new Array<string>();
-	page.on('console', message => consoleMessages.push(message.text()));
-
 	const conditions = async () => {
+		const consoleMessages = new Array<string>();
+		page.on('console', message => consoleMessages.push(message.text()));
+
 		await evaluate(page, css, { imports: 'include', sanitize: 'off' });
 
 		// The body should have exactly two direct children.
@@ -60,10 +60,10 @@ test('Sanitization Off', async ({ page }) => {
 });
 
 test('Sanitize Imports Only', async ({ page }) => {
-	const consoleMessages = new Array<string>();
-	page.on('console', message => consoleMessages.push(message.text()));
-
 	const conditions = async () => {
+		const consoleMessages = new Array<string>();
+		page.on('console', message => consoleMessages.push(message.text()));
+
 		await evaluate(page, css, { imports: 'include', sanitize: 'imports' });
 
 		// The body should have exactly two direct children.
@@ -132,10 +132,10 @@ async function expectEverythingToBeSanitized (page: Page): Promise<void> {
 }
 
 test('Sanitize Everything', async ({ page }) => {
-	const consoleMessages = new Array<string>();
-	page.on('console', message => consoleMessages.push(message.text()));
-
 	const conditions = async () => {
+		const consoleMessages = new Array<string>();
+		page.on('console', message => consoleMessages.push(message.text()));
+
 		await evaluate(page, css, { imports: 'include', sanitize: 'all' });
 	
 		await expectEverythingToBeSanitized(page);
@@ -154,10 +154,10 @@ test('Sanitize Everything', async ({ page }) => {
 });
 
 test('Sanitize Everything By Default', async ({ page }) => {
-	const consoleMessages = new Array<string>();
-	page.on('console', message => consoleMessages.push(message.text()));
-
 	const conditions = async () => {
+		const consoleMessages = new Array<string>();
+		page.on('console', message => consoleMessages.push(message.text()));
+
 		await evaluate(page, css, { imports: 'include' });
 
 		await expectEverythingToBeSanitized(page);
