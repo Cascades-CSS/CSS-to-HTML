@@ -19,35 +19,32 @@ test('Comma', async ({ page }) => {
 
 		// The body should have exactly three direct children.
 		const bodyDirectChildren = page.locator('body > *');
-		expect(await bodyDirectChildren.count()).toBe(3);
+		await expect(bodyDirectChildren).toHaveCount(3);
 
 		// There should be exactly one heading element.
 		const heading = page.locator('h1');
-		expect(await heading.count()).toBe(1);
-		const headingElement = await heading.elementHandle();
-		expect(headingElement).toBeTruthy();
+		await expect(heading).toHaveCount(1);
 
 		// The heading should have specific text content.
+		const headingElement = await heading.elementHandle();
 		const headingContent = await headingElement?.innerHTML();
 		expect(headingContent).toBe('A');
 
 		// There should be exactly one element with class `.subtitle`.
 		const subtitle = page.locator('.subtitle');
-		expect(await subtitle.count()).toBe(1);
-		const subtitleElement = await subtitle.elementHandle();
-		expect(subtitleElement).toBeTruthy();
+		await expect(subtitle).toHaveCount(1);
 
 		// The element with class `.subtitle` should have specific text content.
+		const subtitleElement = await subtitle.elementHandle();
 		const subtitleContent = await subtitleElement?.innerHTML();
 		expect(subtitleContent).toBe('A');
 
 		// There should be exactly one element with class `.content`.
 		const content = page.locator('.content');
-		expect(await content.count()).toBe(1);
-		const contentElement = await content.elementHandle();
-		expect(contentElement).toBeTruthy();
+		await expect(content).toHaveCount(1);
 
 		// The element with class `.content` should have specific text content.
+		const contentElement = await content.elementHandle();
 		const contentContent = await contentElement?.innerHTML();
 		expect(contentContent).toBe('A');
 	};

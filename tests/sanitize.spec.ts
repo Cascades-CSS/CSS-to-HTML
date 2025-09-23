@@ -23,42 +23,31 @@ test('Sanitization Off', async ({ page }) => {
 
 		// The body should have exactly two direct children.
 		const bodyDirectChildren = page.locator('body > *');
-		expect(await bodyDirectChildren.count()).toBe(2);
+		await expect(bodyDirectChildren).toHaveCount(2);
 
 		// The body's direct children should be in a specific order.
-		const last = page.locator('img:first-child + .last:last-child');
-		expect(await last.count()).toBe(1);
-		const lastElement = await last.elementHandle();
-		expect(lastElement).toBeTruthy();
+		const last = page.locator('body > img:first-child + .last:last-child');
+		await expect(last).toHaveCount(1);
 
 		// There should be exactly one img element.
 		const img = page.locator('img');
-		expect(await img.count()).toBe(1);
-		const imgElement = await img.elementHandle();
-		expect(imgElement).toBeTruthy();
+		await expect(img).toHaveCount(1);
 
-		// The img should have an `onerror` attribute.
-		const imgAttribute = await imgElement?.getAttribute('onerror');
-		expect(imgAttribute).toBeDefined();
-		expect(imgAttribute?.length).toBeGreaterThan(10);
-
-		// The img should have an `xss` class.
-		const imgClass = await imgElement?.getAttribute('class');
-		expect(imgClass).toBe('xss');
+		// The img should have an `onerror` attribute, and an `xss` class.
+		await expect(img).toHaveAttribute('onerror', /.{10}/);
+		await expect(img).toHaveClass('xss');
 
 		// There should be exactly one div element.
 		const div = page.locator('div');
-		expect(await div.count()).toBe(1);
-		const divElement = await div.elementHandle();
-		expect(divElement).toBeTruthy();
+		await expect(div).toHaveCount(1);
 
 		// The div should have specific text content.
+		const divElement = await div.elementHandle();
 		const divContent = await divElement?.innerHTML();
 		expect(divContent).toBe('A');
 
 		// The div should have an `onclick` attribute.
-		const divAttribute = await divElement?.getAttribute('onclick');
-		expect(divAttribute).toBe('console.log(\'foo\')');
+		await expect(div).toHaveAttribute('onclick', 'console.log(\'foo\')');
 
 		// An 'xss' console message should be present.
 		expect(consoleMessages.includes('xss')).toBe(true);
@@ -82,41 +71,31 @@ test('Sanitize Imports Only', async ({ page }) => {
 
 		// The body should have exactly two direct children.
 		const bodyDirectChildren = page.locator('body > *');
-		expect(await bodyDirectChildren.count()).toBe(2);
+		await expect(bodyDirectChildren).toHaveCount(2);
 
 		// The body's direct children should be in a specific order.
-		const last = page.locator('img:first-child + .last:last-child');
-		expect(await last.count()).toBe(1);
-		const lastElement = await last.elementHandle();
-		expect(lastElement).toBeTruthy();
+		const last = page.locator('body > img:first-child + .last:last-child');
+		await expect(last).toHaveCount(1);
 
 		// There should be exactly one img element.
 		const img = page.locator('img');
-		expect(await img.count()).toBe(1);
-		const imgElement = await img.elementHandle();
-		expect(imgElement).toBeTruthy();
+		await expect(img).toHaveCount(1);
 
-		// The img should not have an `onerror` attribute.
-		const imgAttribute = await imgElement?.getAttribute('onerror');
-		expect(imgAttribute).toBeNull();
-
-		// The img should not have an `xss` class.
-		const imgClass = await imgElement?.getAttribute('class');
-		expect(imgClass).toBeNull();
+		// The img should not have an `onerror` attribute, nor an `xss` class.
+		await expect(img).not.toHaveAttribute('onerror');
+		await expect(img).not.toHaveClass('xss');
 
 		// There should be exactly one div element.
 		const div = page.locator('div');
-		expect(await div.count()).toBe(1);
-		const divElement = await div.elementHandle();
-		expect(divElement).toBeTruthy();
+		await expect(div).toHaveCount(1);
 
 		// The div should have specific text content.
+		const divElement = await div.elementHandle();
 		const divContent = await divElement?.innerHTML();
 		expect(divContent).toBe('A');
 
 		// The div should have an `onclick` attribute.
-		const divAttribute = await divElement?.getAttribute('onclick');
-		expect(divAttribute).toBe('console.log(\'foo\')');
+		await expect(div).toHaveAttribute('onclick', 'console.log(\'foo\')');
 
 		// An 'xss' console message should not be present.
 		expect(consoleMessages.includes('xss')).toBe(false);
@@ -134,41 +113,31 @@ test('Sanitize Imports Only', async ({ page }) => {
 async function expectEverythingToBeSanitized (page: Page): Promise<void> {
 	// The body should have exactly two direct children.
 	const bodyDirectChildren = page.locator('body > *');
-	expect(await bodyDirectChildren.count()).toBe(2);
+	await expect(bodyDirectChildren).toHaveCount(2);
 
 	// The body's direct children should be in a specific order.
-	const last = page.locator('img:first-child + .last:last-child');
-	expect(await last.count()).toBe(1);
-	const lastElement = await last.elementHandle();
-	expect(lastElement).toBeTruthy();
+	const last = page.locator('body > img:first-child + .last:last-child');
+	await expect(last).toHaveCount(1);
 
 	// There should be exactly one img element.
 	const img = page.locator('img');
-	expect(await img.count()).toBe(1);
-	const imgElement = await img.elementHandle();
-	expect(imgElement).toBeTruthy();
+	await expect(img).toHaveCount(1);
 
-	// The img should not have an `onerror` attribute.
-	const imgAttribute = await imgElement?.getAttribute('onerror');
-	expect(imgAttribute).toBeNull();
-
-	// The img should not have an `xss` class.
-	const imgClass = await imgElement?.getAttribute('class');
-	expect(imgClass).toBeNull();
+	// The img should not have an `onerror` attribute, nor an `xss` class.
+	await expect(img).not.toHaveAttribute('onerror');
+	await expect(img).not.toHaveClass('xss');
 
 	// There should be exactly one div element.
 	const div = page.locator('div');
-	expect(await div.count()).toBe(1);
-	const divElement = await div.elementHandle();
-	expect(divElement).toBeTruthy();
+	await expect(div).toHaveCount(1);
 
 	// The div should have specific text content.
+	const divElement = await div.elementHandle();
 	const divContent = await divElement?.innerHTML();
 	expect(divContent).toBe('A');
 
 	// The div should not have an `onclick` attribute.
-	const divAttribute = await divElement?.getAttribute('onclick');
-	expect(divAttribute).toBeNull();
+	await expect(div).not.toHaveAttribute('onclick');
 }
 
 test('Sanitize Everything', async ({ page }) => {

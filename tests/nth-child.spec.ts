@@ -32,36 +32,35 @@ test('Nth-Child', async ({ page }) => {
 
 		// The body should have exactly eight direct children.
 		const bodyDirectChildren = page.locator('body > *');
-		expect(await bodyDirectChildren.count()).toBe(8);
+		await expect(bodyDirectChildren).toHaveCount(8);
 
 		// The body's direct children should be in a specific order.
 		const last = page.locator('div.first:first-child + span + span + span + span.last + span + span.second-to-last + span:last-child');
-		expect(await last.count()).toBe(1);
-		const lastElement = await last.elementHandle();
-		expect(lastElement).toBeTruthy();
+		await expect(last).toHaveCount(1);
 
 		// The first element should have specific text content.
 		const first = page.locator('div.first:first-child');
-		expect(await first.count()).toBe(1);
 		const firstElement = await first.elementHandle();
 		const firstContent = await firstElement?.innerHTML();
 		expect(firstContent).toBe('B');
+		await expect(first).toHaveCount(1);
 
 		// The fifth element should have specific text content.
 		const fifth = page.locator('span.last:nth-child(5)');
-		expect(await fifth.count()).toBe(1);
 		const fifthElement = await fifth.elementHandle();
 		const fifthContent = await fifthElement?.innerHTML();
 		expect(fifthContent).toBe('C');
+		await expect(fifth).toHaveCount(1);
 
 		// The seventh element should have specific text content.
 		const seventh = page.locator('span.second-to-last:nth-child(7)');
-		expect(await seventh.count()).toBe(1);
 		const seventhElement = await seventh.elementHandle();
 		const seventhContent = await seventhElement?.innerHTML();
 		expect(seventhContent).toBe('F');
+		await expect(seventh).toHaveCount(1);
 
 		// The last element should have specific text content.
+		const lastElement = await last.elementHandle();
 		const lastContent = await lastElement?.innerHTML();
 		expect(lastContent).toBe('E');
 	};

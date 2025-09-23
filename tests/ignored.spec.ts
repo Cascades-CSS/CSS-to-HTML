@@ -35,11 +35,10 @@ test('Ignored', async ({ page }) => {
 
 		// The body should have exactly one child.
 		const bodyDirectChildren = page.locator('body *');
-		expect(await bodyDirectChildren.count()).toBe(1);
-		const element = await bodyDirectChildren.elementHandle();
-		expect(element).toBeTruthy();
+		await expect(bodyDirectChildren).toHaveCount(1);
 
 		// That element should have specific text content.
+		const element = await bodyDirectChildren.elementHandle();
 		const content = await element?.innerHTML();
 		expect(content).toBe('C');
 	};

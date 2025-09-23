@@ -18,21 +18,18 @@ test('Import', async ({ page }) => {
 
 		// The body should have exactly four direct children.
 		const bodyDirectChildren = page.locator('body > *');
-		expect(await bodyDirectChildren.count()).toBe(4);
+		await expect(bodyDirectChildren).toHaveCount(4);
 
 		// The body's direct children should be in a specific order.
 		const last = page.locator('.first:first-child + .second + .third + .last:last-child');
-		expect(await last.count()).toBe(1);
-		const lastElement = await last.elementHandle();
-		expect(lastElement).toBeTruthy();
+		await expect(last).toHaveCount(1);
 
 		// There should be exactly one span element.
 		const span = page.locator('span');
-		expect(await span.count()).toBe(1);
-		const spanElement = await span.elementHandle();
-		expect(spanElement).toBeTruthy();
+		await expect(span).toHaveCount(1);
 
 		// The span should have specific text content.
+		const spanElement = await span.elementHandle();
 		const spanContent = await spanElement?.innerHTML();
 		expect(spanContent).toBe('A');
 	};
